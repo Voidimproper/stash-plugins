@@ -2,8 +2,6 @@ name: Gallery Linker
 description: Links image galleries to related scenes and performers based on file patterns, dates, and metadata.
 version: 1.0.0
 url: https://github.com/Voidimproper/stash-plugins/tree/main/plugins/GalleryLinker
-author: Voidimproper
-license: MIT
 ui:
   javascript:
     - gallery_linker.js
