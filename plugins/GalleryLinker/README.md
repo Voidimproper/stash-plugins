@@ -22,6 +22,7 @@ A Stash plugin that automatically links image galleries to related scenes and pe
    - `gallery_linker.js`
 
 2. Install required Python dependencies:
+
    ```bash
    pip install stashapp-tools requests
    ```
@@ -64,12 +65,14 @@ When viewing the Galleries page, a floating UI panel provides quick access to co
 ### Linking Logic
 
 **Scene Matching**: Galleries are matched to scenes using:
+
 - Title similarity (70%+ confidence)
 - Date matching (within configured tolerance)
 - Filename pattern matching
 - Performer overlap analysis
 
 **Performer Matching**: Performers are linked by:
+
 - Exact name matches in file paths
 - Partial name matches (first/last names)
 - Directory structure analysis
@@ -77,6 +80,7 @@ When viewing the Galleries page, a floating UI panel provides quick access to co
 ## API Integration
 
 The plugin uses Stash's GraphQL API for:
+
 - Querying galleries, scenes, and performers
 - Creating and updating relationships
 - Bulk operations for efficient processing
@@ -108,6 +112,7 @@ To test the plugin:
 ## Contributing
 
 Contributions welcome! Please ensure:
+
 - Code follows existing patterns
 - New features include appropriate tests
 - Documentation is updated for changes
