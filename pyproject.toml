@@ -20,9 +20,6 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: GNU Affero General Public License v3",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -30,7 +27,7 @@ classifiers = [
     "Topic :: Multimedia :: Graphics",
     "Topic :: Multimedia :: Video",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
     "stashapp-tools>=0.2.0",
     "requests>=2.28.0",
@@ -97,7 +94,7 @@ Wiki = "https://github.com/Voidimproper/stash-plugins/wiki"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["plugins*", "tests*"]
+include = ["plugins*", "*tests*"]
 
 [tool.setuptools.package-data]
 "*" = ["*.yml", "*.yaml", "*.json", "*.md", "*.txt"]
@@ -162,41 +159,6 @@ ignore_errors = true
 module = "plugins.*"
 disallow_untyped_defs = false
 
-# Pytest configuration
-[tool.pytest.ini_options]
-minversion = "7.0"
-addopts = [
-    "--verbose",
-    "--tb=short",
-    "--strict-markers",
-    "--strict-config",
-    "--cov=plugins",
-    "--cov-report=term-missing",
-    "--cov-report=html:tests/htmlcov",
-    "--cov-report=xml:tests/coverage.xml",
-    # "--import-mode=importlib",
-]
-testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-markers = [
-    "unit: Unit tests",
-    "integration: Integration tests",
-    "slow: Slow running tests",
-    "network: Tests that require network access",
-]
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::PendingDeprecationWarning",
-    "ignore::UserWarning",
-]
-pythonpath = [
-    "./plugins", 
-    "./plugins/GalleryLinker", 
-    "./tests"
-    ]
-# Coverage configuration
 [tool.coverage.run]
 source = ["plugins"]
 omit = [
