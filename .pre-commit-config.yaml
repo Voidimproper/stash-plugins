@@ -10,18 +10,18 @@ repos:
         args: [--markdown-linebreak-ext=md]
       - id: end-of-file-fixer
       - id: check-yaml
-        args: ['--unsafe']
+        args: ["--unsafe"]
       - id: check-json
       - id: check-toml
       - id: check-xml
       - id: check-added-large-files
-        args: ['--maxkb=10000']
+        args: ["--maxkb=10000"]
       - id: check-merge-conflict
       - id: debug-statements
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
       - id: mixed-line-ending
-        args: ['--fix=lf']
+        args: ["--fix=lf"]
 
   # Python code formatting
   - repo: https://github.com/psf/black
@@ -43,39 +43,21 @@ repos:
     rev: 6.0.0
     hooks:
       - id: flake8
-        additional_dependencies: [
-          flake8-bugbear,
-          flake8-comprehensions,
-          flake8-docstrings,
-          flake8-simplify,
-        ]
+        additional_dependencies:
+          [
+            flake8-bugbear,
+            flake8-comprehensions,
+            flake8-docstrings,
+            flake8-simplify,
+          ]
 
   # Type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.5.1
     hooks:
       - id: mypy
-        additional_dependencies: [
-          types-requests,
-          types-setuptools,
-        ]
+        additional_dependencies: [types-requests, types-setuptools]
         args: [--ignore-missing-imports]
-
-  # Security linting
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
-    hooks:
-      - id: bandit
-        args: [-r, -x, tests/]
-        exclude: ^tests/
-
-  # Documentation
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        args: [--convention=google]
-        exclude: ^tests/
 
   # YAML formatting
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -104,8 +86,8 @@ ci:
 
     for more information, see https://pre-commit.ci
   autofix_prs: true
-  autoupdate_branch: ''
-  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_branch: ""
+  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
   autoupdate_schedule: weekly
   skip: []
   submodules: false

@@ -85,7 +85,7 @@ include = ["plugins"]
 # Black configuration
 [tool.black]
 line-length = 120
-target-version = ['py38', 'py39', 'py310', 'py311']
+target-version = ['py310', 'py311', 'py312']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -114,7 +114,7 @@ force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
 known_first_party = ["plugins"]
-known_third_party = ["stashapi", "requests"]
+known_third_party = ["stashapi", "requests", "stashapp-tools"]
 
 # MyPy configuration
 [tool.mypy]
@@ -225,7 +225,7 @@ max-complexity = 10
 
 [tool.ruff.isort]
 known-first-party = ["plugins"]
-known-third-party = ["stashapi", "requests"]
+known-third-party = ["stashapi", "requests", "stashapp-tools"]
 
 # Pyright configuration
 [tool.pyright]
