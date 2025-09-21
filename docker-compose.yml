@@ -1,13 +1,9 @@
-name: stash
 services:
-  app:
+  stashapp:
     image: stashapp/stash:latest
-    network_mode: "service:tailscale"
     restart: unless-stopped
     ports:
       - 9999:9999
-    depends_on:
-      - tailscale
     logging:
       driver: "json-file"
       options:
@@ -21,19 +17,19 @@ services:
       ## Adjust below to change default port (9999)
       - STASH_PORT=9999
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      ## Adjust below paths (the left part) to your liking.
-      ## E.g. you can change ./config:/root/.stash to ./stash:/root/.stash
-
-      ## Keep configs, scrapers, and plugins here.
-      - ${PWD}/config:/root/.stash
+      - ./plugins:/root/.stash/plugins/voidimproper:cached
+      # - /etc/localtime:/etc/localtime:ro
       ## Point this at your collection.
-      - /mnt/nas/Adult:/data
+      - /Users/$USER/Movies/Adult:/data/scenes
+      - /Users/$USER/Pictures/Adult:/data/pictures
+      ## Keep configs, scrapers, and plugins here.
+      - ./.stash/config:/root/.stash
       ## This is where your stash's metadata lives
-      - ${PWD}/metadata:/metadata
+      - ./.stash/metadata:/metadata
       ## Any other cache content.
-      - ${PWD}/cache:/cache
+      - ./.stash/cache:/cache
       ## Where to store binary blob data (scene covers, images)
-      - ${PWD}/blobs:/blobs
+      - ./.stash/blobs:/blobs
       ## Where to store generated content (screenshots,previews,transcodes,sprites)
-      - ${PWD}/generated:/generated
+      - ./.stash/generated:/generated
+    # command: /bin/sh -c "while sleep 1000; do :; done"

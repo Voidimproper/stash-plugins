@@ -13,7 +13,10 @@ import re
 import sys
 from datetime import datetime
 from difflib import SequenceMatcher
-from typing import Dict, List, Optional, Tuple
+from functools import lru_cache
+from typing import List, Optional, Tuple, Union
+from datatypes import MatchResult, ScoringConfig
+from util import parse_settings_argument, _get_default_settings
 
 try:
     from stashapi.stashapp import StashInterface
@@ -22,30 +25,20 @@ except ImportError as e:
     print("Please install required dependencies: pip install stashapp-tools requests")
     sys.exit(1)
 
+# Type aliases for better code readability
+Scenedict = dict[str, Union[str, List, dict]]
+Gallerydict = dict[str, Union[str, List, dict]]
+
 
 class GalleryLinker:
     """Main class for Gallery Linker Plugin."""
 
-    # Scoring constants for better maintainability
-    TITLE_SIMILARITY_WEIGHT = 0.4
-    DATE_MATCH_WEIGHT = 0.3
-    FILENAME_SIMILARITY_WEIGHT = 0.2
-    PERFORMER_OVERLAP_WEIGHT = 0.1
-    
-    # Threshold constants
-    TITLE_SIMILARITY_THRESHOLD = 0.7
-    FILENAME_SIMILARITY_THRESHOLD = 0.6
-    DEFAULT_MINIMUM_SCORE = 0.3
-    DEFAULT_AUTO_LINK_THRESHOLD = 0.7
-
-    stash: StashInterface
-    settings: Dict
-    logger: logging.Logger
-
     def __init__(self, stash_url: str | None = None, api_key: str | None = None):
         """Initialize the GalleryLinker with Stash connection details."""
+        self.scoring_config = ScoringConfig()
+
         default_config = self._build_default_config()
-        
+
         if stash_url or api_key:
             self._update_config_from_params(default_config, stash_url, api_key)
 
@@ -53,7 +46,44 @@ class GalleryLinker:
         self.settings = _get_default_settings()
         self.logger = self._setup_logger()
 
-    def _build_default_config(self) -> Dict:
+    @property
+    def TITLE_SIMILARITY_WEIGHT(self) -> float:
+        return self.scoring_config.title_similarity_weight
+
+    @property
+    def DATE_MATCH_WEIGHT(self) -> float:
+        return self.scoring_config.date_match_weight
+
+    @property
+    def FILENAME_SIMILARITY_WEIGHT(self) -> float:
+        return self.scoring_config.filename_similarity_weight
+
+    @property
+    def PERFORMER_OVERLAP_WEIGHT(self) -> float:
+        return self.scoring_config.performer_overlap_weight
+
+    @property
+    def TITLE_SIMILARITY_THRESHOLD(self) -> float:
+        return self.scoring_config.title_similarity_threshold
+
+    @property
+    def FILENAME_SIMILARITY_THRESHOLD(self) -> float:
+        return self.scoring_config.filename_similarity_threshold
+
+    @property
+    def DEFAULT_MINIMUM_SCORE(self) -> float:
+        return self.scoring_config.default_minimum_score
+
+    @property
+    def DEFAULT_AUTO_LINK_THRESHOLD(self) -> float:
+        return self.scoring_config.default_auto_link_threshold
+
+    stash: StashInterface
+    settings: dict
+    logger: logging.Logger
+    scoring_config: ScoringConfig
+
+    def _build_default_config(self) -> dict:
         """Build default Stash connection configuration."""
         return {
             "scheme": "http",
@@ -62,16 +92,19 @@ class GalleryLinker:
             "logger": logging.getLogger("stashapi"),
         }
 
-    def _update_config_from_params(self, config: Dict, stash_url: str | None, api_key: str | None) -> None:
+    def _update_config_from_params(self, config: dict, stash_url: str | None, api_key: str | None) -> None:
         """Update configuration with provided URL and API key."""
         if stash_url:
             from urllib.parse import urlparse
+
             parsed = urlparse(stash_url)
-            config.update({
-                "scheme": parsed.scheme or "http",
-                "host": parsed.hostname or "localhost",
-                "port": str(parsed.port or 9999),
-            })
+            config.update(
+                {
+                    "scheme": parsed.scheme or "http",
+                    "host": parsed.hostname or "localhost",
+                    "port": str(parsed.port or 9999),
+                }
+            )
         if api_key:
             config["ApiKey"] = api_key
 
@@ -88,7 +121,7 @@ class GalleryLinker:
 
         return logger
 
-    def load_settings(self, plugin_input: Dict) -> None:
+    def load_settings(self, plugin_input: dict) -> None:
         """Load plugin settings from Stash input."""
         if "server_connection" in plugin_input:
             # Recreate StashInterface with server connection details
@@ -99,9 +132,22 @@ class GalleryLinker:
         if self.settings.get("debugTracing", False):
             self.logger.setLevel(logging.DEBUG)
 
+    def _normalize_string(self, text: Optional[str]) -> str:
+        """Normalize string for comparison."""
+        if not text:
+            return ""
+        return text.lower().strip()
+
+    @lru_cache(maxsize=1000)
     def similarity(self, a: str, b: str) -> float:
-        """Calculate similarity between two strings."""
-        return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+        """Calculate similarity between two strings with caching."""
+        norm_a = self._normalize_string(a)
+        norm_b = self._normalize_string(b)
+
+        if not norm_a or not norm_b:
+            return 0.0
+
+        return SequenceMatcher(None, norm_a, norm_b).ratio()
 
     def extract_date_from_filename(self, filename: str) -> Optional[datetime]:
         """Extract date from filename using common patterns."""
@@ -124,7 +170,7 @@ class GalleryLinker:
                     continue
         return None
 
-    def extract_performers_from_path(self, path: str, performers: List[Dict]) -> List[str]:
+    def extract_performers_from_path(self, path: str, performers: List[dict]) -> List[str]:
         """Extract performer names from file path."""
         found_performers = []
         path_lower = path.lower()
@@ -168,7 +214,7 @@ class GalleryLinker:
                 pass
         return 0.0, None
 
-    def _score_filename_similarity(self, gallery_path: str, scene_files: List[Dict]) -> Tuple[float, Optional[str]]:
+    def _score_filename_similarity(self, gallery_path: str, scene_files: List[dict]) -> Tuple[float, Optional[str]]:
         """Score filename similarity between gallery and scene files."""
         if gallery_path and scene_files:
             gallery_filename = os.path.basename(gallery_path)
@@ -182,7 +228,7 @@ class GalleryLinker:
         return 0.0, None
 
     def _score_performer_overlap(
-        self, gallery_performers: List[Dict], scene_performers: List[Dict]
+        self, gallery_performers: List[dict], scene_performers: List[dict]
     ) -> Tuple[float, Optional[str]]:
         """Score performer overlap between gallery and scene."""
         gallery_ids = {p["id"] for p in gallery_performers}
@@ -195,12 +241,21 @@ class GalleryLinker:
                 return performer_score, f"Performer overlap: {overlap}/{total}"
         return 0.0, None
 
-    def find_matching_scenes(self, gallery: Dict, scenes: List[Dict]) -> List[Tuple[Dict, float]]:
-        """Find scenes that could match the gallery."""
+    def find_matching_scenes(self, gallery: Gallerydict, scenes: List[Scenedict]) -> List[MatchResult]:
+        """Find scenes that could match the gallery with input validation and optimizations."""
+        if not gallery or not isinstance(gallery, dict):
+            raise ValueError("Gallery must be a non-empty dictionary")
+        if not scenes or not isinstance(scenes, list):
+            raise ValueError("Scenes must be a non-empty list")
+
+        self.logger.debug(f"Finding matches for gallery: {gallery.get('title', gallery.get('id'))}")
+
         matches = []
+        minimum_score = self.settings.get("minimumScore", self.DEFAULT_MINIMUM_SCORE)
+
         gallery_title = gallery.get("title", "")
-        gallery_date = gallery.get("date")
-        gallery_path = gallery.get("path", {}).get("path", "") if gallery.get("path") else ""
+        gallery_date = gallery.get("date", "")
+        gallery_path = gallery.get("path", {}).get("path", "") if gallery.get("path") else ""   # type: ignore
 
         # Extract date from filename if no date set
         if not gallery_date and gallery_path:
@@ -208,45 +263,55 @@ class GalleryLinker:
             if extracted_date:
                 gallery_date = extracted_date.strftime("%Y-%m-%d")
 
-        for scene in scenes:
+        for i, scene in enumerate(scenes):
+            if self.settings.get("debugTracing") and i % 100 == 0:
+                self.logger.debug(f"Processed {i}/{len(scenes)} scenes")
+
+            # Early exit optimization - quick title check
+            if gallery_title and scene.get("title"):
+                quick_title_sim = self.similarity(gallery_title, scene["title"])  # type: ignore
+                if quick_title_sim < 0.1:  # Very low threshold for early exit
+                    continue
+
             score = 0.0
             reasons = []
 
             # Title similarity
-            t_score, t_reason = self._score_title_similarity(gallery_title, scene.get("title", ""))
+            t_score, t_reason = self._score_title_similarity(gallery_title, scene.get("title", ""))  # type: ignore
             score += t_score
             if t_reason:
                 reasons.append(t_reason)
 
             # Date matching
-            d_score, d_reason = self._score_date_match(gallery_date, scene.get("date", ""))
+            d_score, d_reason = self._score_date_match(gallery_date, scene.get("date", ""))  # type: ignore
             score += d_score
             if d_reason:
                 reasons.append(d_reason)
 
             # Filename/path similarity
-            f_score, f_reason = self._score_filename_similarity(gallery_path, scene.get("files", []))
+            f_score, f_reason = self._score_filename_similarity(gallery_path, scene.get("files", []))  # type: ignore
             score += f_score
             if f_reason:
                 reasons.append(f_reason)
 
             # Performer overlap
             p_score, p_reason = self._score_performer_overlap(
-                gallery.get("performers", []), scene.get("performers", [])
+                gallery.get("performers", []), scene.get("performers", [])  # type: ignore
             )
             score += p_score
             if p_reason:
                 reasons.append(p_reason)
 
-            minimum_score = self.settings.get("minimumScore", self.DEFAULT_MINIMUM_SCORE)
             if score > minimum_score:
-                matches.append((scene, score, reasons))
+                matches.append(MatchResult(scene, score, reasons))
 
         # Sort by score descending
-        matches.sort(key=lambda x: x[1], reverse=True)
-        return [(scene, score) for scene, score, reasons in matches]
+        matches.sort(key=lambda x: x.score, reverse=True)
 
-    def auto_link_scenes(self) -> Dict:
+        self.logger.debug(f"Found {len(matches)} matches above threshold")
+        return matches
+
+    def auto_link_scenes(self) -> dict:
         """Automatically link galleries to scenes."""
         self.logger.info("Starting auto-link scenes process")
 
@@ -268,36 +333,39 @@ class GalleryLinker:
             if gallery.get("scenes") and not self.settings.get("overwriteExisting", False):
                 continue
 
-            matches = self.find_matching_scenes(gallery, scenes)
+            matches = self.find_matching_scenes(gallery, scenes)  # type: ignore
 
             if matches:
-                best_match, score = matches[0]
+                best_match = matches[0]
 
                 auto_link_threshold = self.settings.get("autoLinkThreshold", self.DEFAULT_AUTO_LINK_THRESHOLD)
-                if score > auto_link_threshold or self.settings.get("autoLinkByDate", False):
+                if best_match.score > auto_link_threshold or self.settings.get("autoLinkByDate", False):
                     # Auto-link if high confidence or auto-link enabled
                     if not self.settings.get("dryRun", False):
                         try:
                             existing_scene_ids = [s["id"] for s in gallery.get("scenes", [])]
-                            if best_match["id"] not in existing_scene_ids:
-                                existing_scene_ids.append(best_match["id"])
+                            if best_match.scene["id"] not in existing_scene_ids:
+                                existing_scene_ids.append(best_match.scene["id"])
 
                                 self.stash.update_gallery({"id": gallery["id"], "scene_ids": existing_scene_ids})
                                 linked_count += 1
                                 self.logger.info(
-                                    f"Linked gallery '{gallery.get('title', gallery['id'])}' to scene '{best_match.get('title', best_match['id'])}'"
+                                    f"Linked gallery '{gallery.get('title', gallery['id'])}' to scene '{best_match.scene.get('title', best_match.scene['id'])}'"
                                 )
                         except Exception as e:
                             self.logger.error(f"Failed to link gallery {gallery['id']}: {e}")
+                            if self.settings.get("debugTracing", False):
+                                self.logger.exception("Full traceback:")
                 else:
                     # Add to suggestions
                     suggestions.append(
                         {
                             "gallery_id": gallery["id"],
                             "gallery_title": gallery.get("title", "Untitled"),
-                            "scene_id": best_match["id"],
-                            "scene_title": best_match.get("title", "Untitled"),
-                            "confidence": score,
+                            "scene_id": best_match.scene["id"],
+                            "scene_title": best_match.scene.get("title", "Untitled"),
+                            "confidence": best_match.score,
+                            "reasons": best_match.reasons,
                         }
                     )
 
@@ -314,7 +382,7 @@ class GalleryLinker:
 
         return result
 
-    def auto_link_performers(self) -> Dict:
+    def auto_link_performers(self) -> dict:
         """Automatically link performers to galleries."""
         self.logger.info("Starting auto-link performers process")
 
@@ -356,7 +424,7 @@ class GalleryLinker:
 
         return result
 
-    def generate_report(self) -> Dict:
+    def generate_report(self) -> dict:
         """Generate a report of gallery relationships."""
         self.logger.info("Generating linking report")
 
@@ -378,95 +446,6 @@ class GalleryLinker:
         }
 
         return report
-
-
-def parse_settings_argument(settings_json: str) -> Dict:
-    """Parse settings JSON string into object using schema from gallery_linker.yml."""
-    if not settings_json:
-        return _get_default_settings()
-
-    try:
-        settings = json.loads(settings_json)
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON in settings argument: {e}") from e
-
-    expected_settings = _get_settings_schema()
-    parsed_settings = {}
-    
-    for key, config in expected_settings.items():
-        value = settings.get(key, config["default"])
-        parsed_settings[key] = _validate_and_convert_setting(key, value, config)
-
-    # Log any unexpected settings
-    unexpected_keys = set(settings.keys()) - set(expected_settings.keys())
-    if unexpected_keys:
-        print(f"Warning: Unexpected settings keys: {unexpected_keys}", file=sys.stderr)
-
-    return parsed_settings
-
-
-def _get_settings_schema() -> Dict:
-    """Get the settings schema definition."""
-    return {
-        "autoLinkByDate": {"type": "boolean", "default": False},
-        "dateTolerance": {"type": "number", "default": 7, "min": 0, "max": 365},
-        "autoLinkByFilename": {"type": "boolean", "default": False},
-        "performerLinking": {"type": "boolean", "default": False},
-        "debugTracing": {"type": "boolean", "default": False},
-        "dryRun": {"type": "boolean", "default": False},
-        "overwriteExisting": {"type": "boolean", "default": False},
-        "minimumScore": {"type": "number", "default": 0.3, "min": 0.0, "max": 1.0},
-        "autoLinkThreshold": {"type": "number", "default": 0.7, "min": 0.0, "max": 1.0},
-    }
-
-
-def _get_default_settings() -> Dict:
-    """Get default settings values."""
-    schema = _get_settings_schema()
-    return {key: config["default"] for key, config in schema.items()}
-
-
-def _validate_and_convert_setting(key: str, value, config: Dict):
-    """Validate and convert a single setting value."""
-    if config["type"] == "boolean":
-        return _convert_to_boolean(key, value)
-    elif config["type"] == "number":
-        return _convert_to_number(key, value, config)
-    else:
-        raise ValueError(f"Unknown setting type '{config['type']}' for key '{key}'")
-
-
-def _convert_to_boolean(key: str, value) -> bool:
-    """Convert value to boolean with validation."""
-    if isinstance(value, bool):
-        return value
-    elif isinstance(value, str):
-        return value.lower() in ("true", "1", "yes", "on")
-    elif isinstance(value, (int, float)):
-        return bool(value)
-    else:
-        raise ValueError(f"Setting '{key}' must be a boolean value, got {type(value)}")
-
-
-def _convert_to_number(key: str, value, config: Dict):
-    """Convert value to number with validation and range checking."""
-    if isinstance(value, (int, float)):
-        result = value
-    elif isinstance(value, str):
-        try:
-            result = float(value) if "." in value else int(value)
-        except ValueError as e:
-            raise ValueError(f"Setting '{key}' must be a number, got '{value}'") from e
-    else:
-        raise ValueError(f"Setting '{key}' must be a number, got {type(value)}")
-    
-    # Range validation
-    if "min" in config and result < config["min"]:
-        raise ValueError(f"Setting '{key}' must be >= {config['min']}, got {result}")
-    if "max" in config and result > config["max"]:
-        raise ValueError(f"Setting '{key}' must be <= {config['max']}, got {result}")
-    
-    return result
 
 
 def main():
