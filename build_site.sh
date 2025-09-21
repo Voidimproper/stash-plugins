@@ -16,7 +16,7 @@ fi
 rm -rf "$outdir"
 mkdir -p "$outdir"
 
-buildPlugin() 
+buildPlugin()
 {
     f=$1
     # get the plugin id from the directory
@@ -28,14 +28,14 @@ buildPlugin()
     # create a directory for the version
     version=$(git log -n 1 --pretty=format:%h -- "$dir"/*)
     updated=$(TZ=UTC0 git log -n 1 --date="format-local:%F %T" --pretty=format:%ad -- "$dir"/*)
-    
+
     # create the zip file
     # copy other files
     zipfile=$(realpath "$outdir/$plugin_id.zip")
-    
-    pushd "$dir" > /dev/null
+
+    pushd "$dir" > /dev/null || exit 1
     zip -r "$zipfile" . > /dev/null
-    popd > /dev/null
+    popd > /dev/null || exit 1
 
     name=$(grep "^name:" "$f" | head -n 1 | cut -d' ' -f2- | sed -e 's/\r//' -e 's/^"\(.*\)"$/\1/')
     description=$(grep "^description:" "$f" | head -n 1 | cut -d' ' -f2- | sed -e 's/\r//' -e 's/^"\(.*\)"$/\1/')
@@ -54,7 +54,7 @@ buildPlugin()
   sha256: $(sha256sum "$zipfile" | cut -d' ' -f1)" >> "$outdir"/index.yml
 
     # handle dependencies
-    if [ ! -z "$dep" ]; then
+    if [ -n "$dep" ]; then
         echo "  requires:" >> "$outdir"/index.yml
         for d in ${dep//,/ }; do
             echo "    - $d" >> "$outdir"/index.yml
@@ -64,6 +64,6 @@ buildPlugin()
     echo "" >> "$outdir"/index.yml
 }
 
-find ./plugins -mindepth 1 -name *.yml | while read file; do
+find ./plugins -mindepth 1 -name "*.yml" | while read -r file; do
     buildPlugin "$file"
 done

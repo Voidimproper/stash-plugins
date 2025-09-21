@@ -216,18 +216,21 @@ jobs:
 ### Common Issues
 
 1. **Import Errors**
+
    ```bash
    # Ensure plugins directory is in Python path
    export PYTHONPATH="${PYTHONPATH}:/path/to/plugins"
    ```
 
 2. **Missing Dependencies**
+
    ```bash
    # Reinstall requirements
    pip install -r tests/requirements.txt --force-reinstall
    ```
 
 3. **Mock Issues**
+
    ```python
    # Ensure proper patching
    @patch('module.StashInterface')  # Use full import path
