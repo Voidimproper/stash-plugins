@@ -26,40 +26,54 @@ except ImportError as e:
 class GalleryLinker:
     """Main class for Gallery Linker Plugin."""
 
+    # Scoring constants for better maintainability
+    TITLE_SIMILARITY_WEIGHT = 0.4
+    DATE_MATCH_WEIGHT = 0.3
+    FILENAME_SIMILARITY_WEIGHT = 0.2
+    PERFORMER_OVERLAP_WEIGHT = 0.1
+    
+    # Threshold constants
+    TITLE_SIMILARITY_THRESHOLD = 0.7
+    FILENAME_SIMILARITY_THRESHOLD = 0.6
+    DEFAULT_MINIMUM_SCORE = 0.3
+    DEFAULT_AUTO_LINK_THRESHOLD = 0.7
+
     stash: StashInterface
     settings: Dict
     logger: logging.Logger
 
     def __init__(self, stash_url: str | None = None, api_key: str | None = None):
         """Initialize the GalleryLinker with Stash connection details."""
-        # Initialize with default connection config
-        default_config = {
+        default_config = self._build_default_config()
+        
+        if stash_url or api_key:
+            self._update_config_from_params(default_config, stash_url, api_key)
+
+        self.stash = StashInterface(default_config)
+        self.settings = _get_default_settings()
+        self.logger = self._setup_logger()
+
+    def _build_default_config(self) -> Dict:
+        """Build default Stash connection configuration."""
+        return {
             "scheme": "http",
             "host": "localhost",
             "port": "9999",
             "logger": logging.getLogger("stashapi"),
         }
 
-        # If custom URL/API key provided, parse and update config
-        if stash_url or api_key:
-            if stash_url:
-                # Parse URL to extract components
-                from urllib.parse import urlparse
-
-                parsed = urlparse(stash_url)
-                default_config.update(
-                    {
-                        "scheme": parsed.scheme or "http",
-                        "host": parsed.hostname or "localhost",
-                        "port": str(parsed.port or 9999),
-                    }
-                )
-            if api_key:
-                default_config["ApiKey"] = api_key
-
-        self.stash = StashInterface(default_config)
-        self.settings = {}
-        self.logger = self._setup_logger()
+    def _update_config_from_params(self, config: Dict, stash_url: str | None, api_key: str | None) -> None:
+        """Update configuration with provided URL and API key."""
+        if stash_url:
+            from urllib.parse import urlparse
+            parsed = urlparse(stash_url)
+            config.update({
+                "scheme": parsed.scheme or "http",
+                "host": parsed.hostname or "localhost",
+                "port": str(parsed.port or 9999),
+            })
+        if api_key:
+            config["ApiKey"] = api_key
 
     def _setup_logger(self) -> logging.Logger:
         """Set up logging configuration."""
@@ -132,13 +146,15 @@ class GalleryLinker:
         return list(set(found_performers))  # Remove duplicates
 
     def _score_title_similarity(self, gallery_title: str, scene_title: str) -> Tuple[float, Optional[str]]:
+        """Score title similarity between gallery and scene."""
         if gallery_title and scene_title:
             title_sim = self.similarity(gallery_title, scene_title)
-            if title_sim > 0.7:
-                return title_sim * 0.4, f"Title similarity: {title_sim: .2f}"
+            if title_sim > self.TITLE_SIMILARITY_THRESHOLD:
+                return title_sim * self.TITLE_SIMILARITY_WEIGHT, f"Title similarity: {title_sim:.2f}"
         return 0.0, None
 
     def _score_date_match(self, gallery_date: Optional[str], scene_date: Optional[str]) -> Tuple[float, Optional[str]]:
+        """Score date match between gallery and scene."""
         if gallery_date and scene_date:
             try:
                 g_date = datetime.strptime(gallery_date, "%Y-%m-%d")
@@ -146,32 +162,36 @@ class GalleryLinker:
                 date_diff = abs((g_date - s_date).days)
                 tolerance = self.settings.get("dateTolerance", 7)
                 if date_diff <= tolerance:
-                    date_score = max(0, 1 - (date_diff / tolerance)) * 0.3
+                    date_score = max(0, 1 - (date_diff / tolerance)) * self.DATE_MATCH_WEIGHT
                     return date_score, f"Date match: {date_diff} days difference"
             except ValueError:
                 pass
         return 0.0, None
 
     def _score_filename_similarity(self, gallery_path: str, scene_files: List[Dict]) -> Tuple[float, Optional[str]]:
+        """Score filename similarity between gallery and scene files."""
         if gallery_path and scene_files:
+            gallery_filename = os.path.basename(gallery_path)
             for file_info in scene_files:
                 file_path = file_info.get("path", "")
                 if file_path:
-                    path_sim = self.similarity(os.path.basename(gallery_path), os.path.basename(file_path))
-                    if path_sim > 0.6:
-                        return path_sim * 0.2, f"Filename similarity: {path_sim: .2f}"
+                    scene_filename = os.path.basename(file_path)
+                    path_sim = self.similarity(gallery_filename, scene_filename)
+                    if path_sim > self.FILENAME_SIMILARITY_THRESHOLD:
+                        return path_sim * self.FILENAME_SIMILARITY_WEIGHT, f"Filename similarity: {path_sim:.2f}"
         return 0.0, None
 
     def _score_performer_overlap(
         self, gallery_performers: List[Dict], scene_performers: List[Dict]
     ) -> Tuple[float, Optional[str]]:
-        gallery_ids = set(p["id"] for p in gallery_performers)  # noqa: C401
-        scene_ids = set(p["id"] for p in scene_performers)  # noqa: C401
+        """Score performer overlap between gallery and scene."""
+        gallery_ids = {p["id"] for p in gallery_performers}
+        scene_ids = {p["id"] for p in scene_performers}
         if gallery_ids and scene_ids:
             overlap = len(gallery_ids.intersection(scene_ids))
             total = len(gallery_ids.union(scene_ids))
             if total > 0:
-                performer_score = (overlap / total) * 0.1
+                performer_score = (overlap / total) * self.PERFORMER_OVERLAP_WEIGHT
                 return performer_score, f"Performer overlap: {overlap}/{total}"
         return 0.0, None
 
@@ -218,7 +238,8 @@ class GalleryLinker:
             if p_reason:
                 reasons.append(p_reason)
 
-            if score > 0.3:  # Minimum threshold
+            minimum_score = self.settings.get("minimumScore", self.DEFAULT_MINIMUM_SCORE)
+            if score > minimum_score:
                 matches.append((scene, score, reasons))
 
         # Sort by score descending
@@ -252,7 +273,8 @@ class GalleryLinker:
             if matches:
                 best_match, score = matches[0]
 
-                if score > 0.7 or self.settings.get("autoLinkByDate", False):
+                auto_link_threshold = self.settings.get("autoLinkThreshold", self.DEFAULT_AUTO_LINK_THRESHOLD)
+                if score > auto_link_threshold or self.settings.get("autoLinkByDate", False):
                     # Auto-link if high confidence or auto-link enabled
                     if not self.settings.get("dryRun", False):
                         try:
@@ -358,11 +380,110 @@ class GalleryLinker:
         return report
 
 
+def parse_settings_argument(settings_json: str) -> Dict:
+    """Parse settings JSON string into object using schema from gallery_linker.yml."""
+    if not settings_json:
+        return _get_default_settings()
+
+    try:
+        settings = json.loads(settings_json)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON in settings argument: {e}") from e
+
+    expected_settings = _get_settings_schema()
+    parsed_settings = {}
+    
+    for key, config in expected_settings.items():
+        value = settings.get(key, config["default"])
+        parsed_settings[key] = _validate_and_convert_setting(key, value, config)
+
+    # Log any unexpected settings
+    unexpected_keys = set(settings.keys()) - set(expected_settings.keys())
+    if unexpected_keys:
+        print(f"Warning: Unexpected settings keys: {unexpected_keys}", file=sys.stderr)
+
+    return parsed_settings
+
+
+def _get_settings_schema() -> Dict:
+    """Get the settings schema definition."""
+    return {
+        "autoLinkByDate": {"type": "boolean", "default": False},
+        "dateTolerance": {"type": "number", "default": 7, "min": 0, "max": 365},
+        "autoLinkByFilename": {"type": "boolean", "default": False},
+        "performerLinking": {"type": "boolean", "default": False},
+        "debugTracing": {"type": "boolean", "default": False},
+        "dryRun": {"type": "boolean", "default": False},
+        "overwriteExisting": {"type": "boolean", "default": False},
+        "minimumScore": {"type": "number", "default": 0.3, "min": 0.0, "max": 1.0},
+        "autoLinkThreshold": {"type": "number", "default": 0.7, "min": 0.0, "max": 1.0},
+    }
+
+
+def _get_default_settings() -> Dict:
+    """Get default settings values."""
+    schema = _get_settings_schema()
+    return {key: config["default"] for key, config in schema.items()}
+
+
+def _validate_and_convert_setting(key: str, value, config: Dict):
+    """Validate and convert a single setting value."""
+    if config["type"] == "boolean":
+        return _convert_to_boolean(key, value)
+    elif config["type"] == "number":
+        return _convert_to_number(key, value, config)
+    else:
+        raise ValueError(f"Unknown setting type '{config['type']}' for key '{key}'")
+
+
+def _convert_to_boolean(key: str, value) -> bool:
+    """Convert value to boolean with validation."""
+    if isinstance(value, bool):
+        return value
+    elif isinstance(value, str):
+        return value.lower() in ("true", "1", "yes", "on")
+    elif isinstance(value, (int, float)):
+        return bool(value)
+    else:
+        raise ValueError(f"Setting '{key}' must be a boolean value, got {type(value)}")
+
+
+def _convert_to_number(key: str, value, config: Dict):
+    """Convert value to number with validation and range checking."""
+    if isinstance(value, (int, float)):
+        result = value
+    elif isinstance(value, str):
+        try:
+            result = float(value) if "." in value else int(value)
+        except ValueError as e:
+            raise ValueError(f"Setting '{key}' must be a number, got '{value}'") from e
+    else:
+        raise ValueError(f"Setting '{key}' must be a number, got {type(value)}")
+    
+    # Range validation
+    if "min" in config and result < config["min"]:
+        raise ValueError(f"Setting '{key}' must be >= {config['min']}, got {result}")
+    if "max" in config and result > config["max"]:
+        raise ValueError(f"Setting '{key}' must be <= {config['max']}, got {result}")
+    
+    return result
+
+
 def main():
     """Define the main entry point for the plugin."""
     parser = argparse.ArgumentParser(description="Gallery Linker Plugin")
     parser.add_argument("--url", dest="stash_url", help="Stash URL")
     parser.add_argument("--api-key", dest="api_key", help="Stash API Key")
+    parser.add_argument("--dry-run", dest="dry_run", action="store_true", help="Enable dry run mode")
+    parser.add_argument("--debug", dest="debug", action="store_true", help="Enable debug logging")
+    parser.add_argument(
+        "--mode",
+        dest="mode",
+        choices=["auto_link_scenes", "auto_link_performers", "generate_report"],
+        default="auto_link_scenes",
+        help="Operation mode",
+    )
+    parser.add_argument("--settings", dest="settings", help="JSON string of plugin settings")
 
     args = parser.parse_args()
 
@@ -378,7 +499,18 @@ def main():
         linker.load_settings(plugin_input)
         mode = plugin_input.get("args", {}).get("mode", "auto_link_scenes")
     else:
-        mode = "auto_link_scenes"
+        # Parse settings from command line argument if provided
+        if args.settings:
+            try:
+                parsed_settings = parse_settings_argument(args.settings)
+                # Create plugin_input structure to use existing load_settings method
+                plugin_input = {"args": parsed_settings}
+                linker.load_settings(plugin_input)
+            except ValueError as e:
+                print(f"Error parsing settings: {e}", file=sys.stderr)
+                return 1
+
+        mode = args.mode
 
     # Execute the requested operation
     try:
