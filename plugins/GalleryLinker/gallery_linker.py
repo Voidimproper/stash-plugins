@@ -26,17 +26,33 @@ except ImportError as e:
 
 
 class GalleryLinker:
-    def __init__(self, stash_url: str = None, api_key: str = None):
-        self.stash = StashInterface({
+    stash: StashInterface
+    settings: Dict
+    logger: logging.Logger
+    def __init__(self, stash_url: str | None = None, api_key: str | None = None):
+        # Initialize with default connection config
+        default_config = {
             "scheme": "http",
             "host": "localhost",
-            "port": 9999,
+            "port": "9999",
             "logger": logging.getLogger("stashapi")
-        })
+        }
 
-        if stash_url:
-            self.stash.set_connection(stash_url, api_key)
+        # If custom URL/API key provided, parse and update config
+        if stash_url or api_key:
+            if stash_url:
+                # Parse URL to extract components
+                from urllib.parse import urlparse
+                parsed = urlparse(stash_url)
+                default_config.update({
+                    "scheme": parsed.scheme or "http",
+                    "host": parsed.hostname or "localhost",
+                    "port": str(parsed.port or 9999)
+                })
+            if api_key:
+                default_config["ApiKey"] = api_key
 
+        self.stash = StashInterface(default_config)
         self.settings = {}
         self.logger = self._setup_logger()
 
@@ -58,11 +74,8 @@ class GalleryLinker:
     def load_settings(self, plugin_input: Dict) -> None:
         """Load plugin settings from Stash input"""
         if 'server_connection' in plugin_input:
-            conn = plugin_input['server_connection']
-            self.stash.set_connection(
-                f"{conn['Scheme']}://{conn['Host']}:{conn['Port']}/graphql",
-                conn.get('ApiKey')
-            )
+            # Recreate StashInterface with server connection details
+            self.stash = StashInterface(plugin_input['server_connection'])
 
         self.settings = plugin_input.get('args', {})
 
@@ -291,7 +304,10 @@ class GalleryLinker:
                         except Exception as e:
                             self.logger.error(f"Failed to update gallery {gallery['id']}: {e}")
 
-        result = {"linked_count": linked_count}
+        result = {
+            "linked_count": linked_count,
+            "message": ""
+            }
 
         if self.settings.get('dryRun', False):
             result["message"] = f"DRY RUN: Would have updated {linked_count} galleries with performers"
