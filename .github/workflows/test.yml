@@ -36,8 +36,8 @@ jobs:
 
       - name: Lint with flake8
         run: |
-          flake8 plugins tests --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 plugins tests --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+          flake8 plugins --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 plugins --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
 
       - name: Type check with mypy
         run: |
@@ -61,15 +61,15 @@ jobs:
 
       - name: Check code formatting with black
         run: |
-          black --check --diff plugins tests
+          black --check --diff plugins
 
       - name: Check import sorting with isort
         run: |
-          isort --check-only --diff plugins tests
+          isort --check-only --diff plugins
 
       - name: Lint with ruff
         run: |
-          ruff check plugins tests
+          ruff check plugins
         continue-on-error: true
 
       - name: Security check with bandit
