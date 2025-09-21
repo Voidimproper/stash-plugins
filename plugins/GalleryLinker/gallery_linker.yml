@@ -1,0 +1,61 @@
+name: Gallery Linker
+description: Links image galleries to related scenes and performers based on file patterns, dates, and metadata.
+version: 1.0.0
+url: https://github.com/stashapp/CommunityScripts
+ui:
+  javascript:
+    - gallery_linker.js
+settings:
+  autoLinkByDate:
+    displayName: Auto-link by Date
+    description: Automatically link galleries to scenes with matching dates (within tolerance)
+    type: BOOLEAN
+  dateTolerance:
+    displayName: Date Tolerance (days)
+    description: Number of days tolerance when matching gallery and scene dates
+    type: NUMBER
+  autoLinkByFilename:
+    displayName: Auto-link by Filename
+    description: Automatically link galleries based on filename patterns
+    type: BOOLEAN
+  performerLinking:
+    displayName: Link Performers
+    description: Automatically link performers found in gallery filenames/paths to galleries
+    type: BOOLEAN
+  debugTracing:
+    displayName: Debug Tracing
+    description: Enable debug tracing for troubleshooting
+    type: BOOLEAN
+  dryRun:
+    displayName: Dry Run Mode
+    description: Preview changes without actually making them
+    type: BOOLEAN
+exec:
+  - python
+  - "{pluginDir}/gallery_linker.py"
+interface: raw
+tasks:
+  - name: Auto-Link Galleries to Scenes
+    description: Automatically link galleries to related scenes based on dates and filenames
+    defaultArgs:
+      mode: auto_link_scenes
+  - name: Auto-Link Performers to Galleries
+    description: Automatically link performers to galleries based on filenames and paths
+    defaultArgs:
+      mode: auto_link_performers
+  - name: Link Gallery to Specific Scene
+    description: Manually link a specific gallery to a specific scene
+    defaultArgs:
+      mode: link_gallery_scene
+  - name: Generate Linking Report
+    description: Generate a report of all gallery-scene-performer relationships
+    defaultArgs:
+      mode: generate_report
+  - name: Validate Existing Links
+    description: Validate and report on existing gallery relationships
+    defaultArgs:
+      mode: validate_links
+  - name: Clean Orphaned Relationships
+    description: Remove broken or invalid gallery relationships
+    defaultArgs:
+      mode: clean_orphaned
