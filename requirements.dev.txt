@@ -1,0 +1,13 @@
+# Development requirements
+pre-commit
+
+# Test requirements for Stash plugins
+
+# Code quality and linting
+flake8>=6.0.0
+black>=23.0.0
+mypy>=1.0.0
+
+# Plugin dependencies (for testing)
+stashapp-tools>=0.2.0
+requests>=2.28.0
