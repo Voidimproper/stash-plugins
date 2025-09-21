@@ -1,0 +1,61 @@
+[flake8]
+# Flake8 configuration for stash-plugins
+
+# Maximum line length
+max-line-length = 120
+
+# Error codes to ignore
+ignore =
+    # Line too long (handled by black)
+    E501,
+    # Line break before binary operator (conflicts with black)
+    W503,
+    # Line break after binary operator (conflicts with black)
+    W504,
+    # Blank line contains whitespace
+    W293,
+    # Multiple spaces before operator
+    E221,
+    # Multiple spaces after operator
+    E222,
+    # Multiple spaces before keyword
+    E271,
+    # Multiple spaces after keyword
+    E272
+
+# Directories to exclude
+exclude =
+    .git,
+    __pycache__,
+    .pytest_cache,
+    .mypy_cache,
+    .coverage,
+    htmlcov,
+    build,
+    dist,
+    *.egg-info,
+    venv,
+    .venv,
+    env,
+    .env
+
+# Files to exclude
+per-file-ignores =
+    # Tests can have longer lines and more complex structures
+    tests/*:E501,F401,F811
+    # Init files can have unused imports
+    __init__.py:F401
+    # Configuration files
+    conftest.py:F401,F811
+
+# Maximum complexity for McCabe
+max-complexity = 15
+
+# Show source code for each error
+show-source = True
+
+# Show pep8 violation statistics
+statistics = True
+
+# Count errors and warnings
+count = True
