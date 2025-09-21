@@ -1,6 +1,7 @@
 # Gallery Linker Plugin
 
-A Stash plugin that automatically links image galleries to related scenes and performers based on file patterns, dates, and metadata.
+A Stash plugin that automatically links image galleries to related scenes and
+performers based on file patterns, dates, and metadata.
 
 > **Note**: This plugin is part of the Gallery Linker repository. For the complete project documentation, see the [main README](../README.md).
 

@@ -1,4 +1,4 @@
-"""Stash plugins package"""
+"""Stash plugins package."""
 # from GalleryLinker import gallery_linker
 
 # from . import *
