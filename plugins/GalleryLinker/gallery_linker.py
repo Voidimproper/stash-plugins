@@ -350,9 +350,9 @@ class GalleryLinker:
             "linked_to_scenes": linked_to_scenes,
             "linked_to_performers": linked_to_performers,
             "unlinked": unlinked,
-            "coverage_percentage": round((total_galleries - unlinked) / total_galleries * 100, 2)
-            if total_galleries > 0
-            else 0,
+            "coverage_percentage": (
+                round((total_galleries - unlinked) / total_galleries * 100, 2) if total_galleries > 0 else 0
+            ),
         }
 
         return report
