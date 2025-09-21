@@ -11,13 +11,11 @@ import argparse
 import logging
 import re
 import os
-from datetime import datetime, timedelta
-from pathlib import Path
+from datetime import datetime
 from difflib import SequenceMatcher
 from typing import List, Dict, Optional, Tuple
 
 try:
-    import requests
     from stashapi.stashapp import StashInterface
 except ImportError as e:
     print(f"Error importing required modules: {e}")
@@ -29,6 +27,7 @@ class GalleryLinker:
     stash: StashInterface
     settings: Dict
     logger: logging.Logger
+
     def __init__(self, stash_url: str | None = None, api_key: str | None = None):
         # Initialize with default connection config
         default_config = {
@@ -128,6 +127,51 @@ class GalleryLinker:
 
         return list(set(found_performers))  # Remove duplicates
 
+    def _score_title_similarity(self, gallery_title: str, scene_title: str) -> Tuple[float, Optional[str]]:
+        if gallery_title and scene_title:
+            title_sim = self.similarity(gallery_title, scene_title)
+            if title_sim > 0.7:
+                return title_sim * 0.4, f"Title similarity: {title_sim:.2f}"
+        return 0.0, None
+
+    def _score_date_match(self, gallery_date: Optional[str], scene_date: Optional[str]) -> Tuple[float, Optional[str]]:
+        if gallery_date and scene_date:
+            try:
+                g_date = datetime.strptime(gallery_date, '%Y-%m-%d')
+                s_date = datetime.strptime(scene_date, '%Y-%m-%d')
+                date_diff = abs((g_date - s_date).days)
+                tolerance = self.settings.get('dateTolerance', 7)
+                if date_diff <= tolerance:
+                    date_score = max(0, 1 - (date_diff / tolerance)) * 0.3
+                    return date_score, f"Date match: {date_diff} days difference"
+            except ValueError:
+                pass
+        return 0.0, None
+
+    def _score_filename_similarity(self, gallery_path: str, scene_files: List[Dict]) -> Tuple[float, Optional[str]]:
+        if gallery_path and scene_files:
+            for file_info in scene_files:
+                file_path = file_info.get('path', '')
+                if file_path:
+                    path_sim = self.similarity(
+                        os.path.basename(gallery_path),
+                        os.path.basename(file_path)
+                    )
+                    if path_sim > 0.6:
+                        return path_sim * 0.2, f"Filename similarity: {path_sim:.2f}"
+        return 0.0, None
+
+    def _score_performer_overlap(self, gallery_performers: List[Dict], scene_performers: List[Dict]) -> Tuple[float, Optional[str]]:
+        gallery_ids = set(p['id'] for p in gallery_performers)
+        scene_ids = set(p['id'] for p in scene_performers)
+        if gallery_ids and scene_ids:
+            overlap = len(gallery_ids.intersection(scene_ids))
+            total = len(gallery_ids.union(scene_ids))
+            if total > 0:
+                performer_score = (overlap / total) * 0.1
+                return performer_score, f"Performer overlap: {overlap}/{total}"
+        return 0.0, None
+
     def find_matching_scenes(self, gallery: Dict, scenes: List[Dict]) -> List[Tuple[Dict, float]]:
         """Find scenes that could match the gallery"""
         matches = []
@@ -146,53 +190,30 @@ class GalleryLinker:
             reasons = []
 
             # Title similarity
-            if gallery_title and scene.get('title'):
-                title_sim = self.similarity(gallery_title, scene['title'])
-                if title_sim > 0.7:
-                    score += title_sim * 0.4
-                    reasons.append(f"Title similarity: {title_sim:.2f}")
+            t_score, t_reason = self._score_title_similarity(gallery_title, scene.get('title', ''))
+            score += t_score
+            if t_reason:
+                reasons.append(t_reason)
 
             # Date matching
-            if gallery_date and scene.get('date'):
-                try:
-                    g_date = datetime.strptime(gallery_date, '%Y-%m-%d')
-                    s_date = datetime.strptime(scene['date'], '%Y-%m-%d')
-                    date_diff = abs((g_date - s_date).days)
-                    tolerance = self.settings.get('dateTolerance', 7)
-
-                    if date_diff <= tolerance:
-                        date_score = max(0, 1 - (date_diff / tolerance)) * 0.3
-                        score += date_score
-                        reasons.append(f"Date match: {date_diff} days difference")
-                except ValueError:
-                    pass
+            d_score, d_reason = self._score_date_match(gallery_date, scene.get('date', ''))
+            score += d_score
+            if d_reason:
+                reasons.append(d_reason)
 
             # Filename/path similarity
-            scene_files = scene.get('files', [])
-            if gallery_path and scene_files:
-                for file_info in scene_files:
-                    file_path = file_info.get('path', '')
-                    if file_path:
-                        path_sim = self.similarity(
-                            os.path.basename(gallery_path),
-                            os.path.basename(file_path)
-                        )
-                        if path_sim > 0.6:
-                            score += path_sim * 0.2
-                            reasons.append(f"Filename similarity: {path_sim:.2f}")
-                            break
+            f_score, f_reason = self._score_filename_similarity(gallery_path, scene.get('files', []))
+            score += f_score
+            if f_reason:
+                reasons.append(f_reason)
 
             # Performer overlap
-            gallery_performers = set(p['id'] for p in gallery.get('performers', []))
-            scene_performers = set(p['id'] for p in scene.get('performers', []))
-
-            if gallery_performers and scene_performers:
-                overlap = len(gallery_performers.intersection(scene_performers))
-                total = len(gallery_performers.union(scene_performers))
-                if total > 0:
-                    performer_score = (overlap / total) * 0.1
-                    score += performer_score
-                    reasons.append(f"Performer overlap: {overlap}/{total}")
+            p_score, p_reason = self._score_performer_overlap(
+                gallery.get('performers', []), scene.get('performers', [])
+            )
+            score += p_score
+            if p_reason:
+                reasons.append(p_reason)
 
             if score > 0.3:  # Minimum threshold
                 matches.append((scene, score, reasons))
@@ -223,7 +244,7 @@ class GalleryLinker:
             if gallery.get('scenes') and not self.settings.get('overwriteExisting', False):
                 continue
 
-            matches = self.find_matching_scenes(gallery, scenes)
+            matches = self.find_matching_scenes(gallery, scenes)  # type: ignore
 
             if matches:
                 best_match, score = matches[0]
@@ -307,7 +328,7 @@ class GalleryLinker:
         result = {
             "linked_count": linked_count,
             "message": ""
-            }
+        }
 
         if self.settings.get('dryRun', False):
             result["message"] = f"DRY RUN: Would have updated {linked_count} galleries with performers"
