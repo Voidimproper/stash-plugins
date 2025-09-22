@@ -1,4 +1,5 @@
 """Data types for GalleryLinker plugin."""
+
 from dataclasses import dataclass, field
 
 

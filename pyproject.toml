@@ -48,6 +48,7 @@ dev = [
 
     # Code gen
     "datamodel-code-generator[http,graphql]>=0.33.0",
+    "gql[all]>=4.0.0",
 ]
 
 lint = [

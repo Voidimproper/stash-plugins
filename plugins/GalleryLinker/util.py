@@ -1,4 +1,5 @@
 """Utility functions for GalleryLinker plugin."""
+
 import json
 from dataclasses import asdict
 
