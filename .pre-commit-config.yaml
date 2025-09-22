@@ -1,6 +1,8 @@
 # Pre-commit configuration for stash-plugins
 # Install with: pre-commit install
 
+default_language_version:
+  python: python3.12
 repos:
   # General pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks

@@ -43,19 +43,19 @@ tasks:
     description: Automatically link performers to galleries based on filenames and paths
     defaultArgs:
       mode: auto_link_performers
-  - name: Link Gallery to Specific Scene
-    description: Manually link a specific gallery to a specific scene
-    defaultArgs:
-      mode: link_gallery_scene
   - name: Generate Linking Report
     description: Generate a report of all gallery-scene-performer relationships
     defaultArgs:
       mode: generate_report
-  - name: Validate Existing Links
-    description: Validate and report on existing gallery relationships
-    defaultArgs:
-      mode: validate_links
-  - name: Clean Orphaned Relationships
-    description: Remove broken or invalid gallery relationships
-    defaultArgs:
-      mode: clean_orphaned
+  # - name: Link Gallery to Specific Scene
+  #   description: Manually link a specific gallery to a specific scene
+  #   defaultArgs:
+  #     mode: link_gallery_scene
+  # - name: Validate Existing Links
+  #   description: Validate and report on existing gallery relationships
+  #   defaultArgs:
+  #     mode: validate_links
+  # - name: Clean Orphaned Relationships
+  #   description: Remove broken or invalid gallery relationships
+  #   defaultArgs:
+  #     mode: clean_orphaned

@@ -356,3 +356,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+<<<<<<< HEAD
+=======
+.stash
+.mailmap
+>>>>>>> refactor/gallery-linker
