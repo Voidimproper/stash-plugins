@@ -121,6 +121,12 @@ known_third_party = ["stashapi", "requests", "stashapp-tools"]
 
 # MyPy configuration
 [tool.mypy]
+exclude = '''(?x) (
+        ^tests
+        | ^venv
+        | ^.venv
+        | ^plugins/void_common/models
+    )'''
 python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
@@ -141,11 +147,11 @@ ignore_missing_imports = true
 
 # Per-module options
 [[tool.mypy.overrides]]
-module = "tests.*"
+module = ["tests.*"]
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = "plugins.*"
+module = ["plugins.*"]
 disallow_untyped_defs = false
 
 # Bandit security linting configuration
