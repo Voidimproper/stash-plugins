@@ -48,4 +48,4 @@ class StatsResultType(BaseModel):
     total_o_count: Int
     total_play_count: Int
     total_play_duration: Float
-    typename__: Optional[Literal['StatsResultType']] = Field('StatsResultType', alias='__typename')
+    typename__: Optional[Literal["StatsResultType"]] = Field("StatsResultType", alias="__typename")

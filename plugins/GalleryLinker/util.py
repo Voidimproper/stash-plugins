@@ -1,7 +1,8 @@
-# import sys
+"""Utility functions for GalleryLinker plugin."""
 import json
-from .datatypes import SettingsSchema
 from dataclasses import asdict
+
+from .datatypes import SettingsSchema
 
 
 def parse_settings_argument(settings_json: str) -> dict:

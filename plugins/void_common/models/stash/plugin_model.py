@@ -40,9 +40,9 @@ The `String` scalar type represents textual data, represented as UTF-8 character
 
 
 class PluginSettingTypeEnum(Enum):
-    BOOLEAN = 'BOOLEAN'
-    NUMBER = 'NUMBER'
-    STRING = 'STRING'
+    BOOLEAN = "BOOLEAN"
+    NUMBER = "NUMBER"
+    STRING = "STRING"
 
 
 class Plugin(BaseModel):
@@ -54,13 +54,13 @@ class Plugin(BaseModel):
     paths: PluginPaths
     requires: Optional[list[ID]] = Field(
         None,
-        description='Plugin IDs of plugins that this plugin depends on.\nApplies only for UI plugins to indicate css/javascript load order.',
+        description="Plugin IDs of plugins that this plugin depends on.\nApplies only for UI plugins to indicate css/javascript load order.",
     )
     settings: Optional[list[PluginSetting]] = None
     tasks: Optional[list[PluginTask]] = None
     url: Optional[String] = None
     version: Optional[String] = None
-    typename__: Optional[Literal['Plugin']] = Field('Plugin', alias='__typename')
+    typename__: Optional[Literal["Plugin"]] = Field("Plugin", alias="__typename")
 
 
 class PluginHook(BaseModel):
@@ -68,19 +68,19 @@ class PluginHook(BaseModel):
     hooks: Optional[list[String]] = None
     name: String
     plugin: Plugin
-    typename__: Optional[Literal['PluginHook']] = Field('PluginHook', alias='__typename')
+    typename__: Optional[Literal["PluginHook"]] = Field("PluginHook", alias="__typename")
 
 
 class PluginPaths(BaseModel):
     css: Optional[list[String]] = None
     javascript: Optional[list[String]] = None
-    typename__: Optional[Literal['PluginPaths']] = Field('PluginPaths', alias='__typename')
+    typename__: Optional[Literal["PluginPaths"]] = Field("PluginPaths", alias="__typename")
 
 
 class PluginResult(BaseModel):
     error: Optional[String] = None
     result: Optional[String] = None
-    typename__: Optional[Literal['PluginResult']] = Field('PluginResult', alias='__typename')
+    typename__: Optional[Literal["PluginResult"]] = Field("PluginResult", alias="__typename")
 
 
 class PluginSetting(BaseModel):
@@ -88,20 +88,20 @@ class PluginSetting(BaseModel):
     display_name: Optional[String] = None
     name: String
     type: PluginSettingTypeEnum
-    typename__: Optional[Literal['PluginSetting']] = Field('PluginSetting', alias='__typename')
+    typename__: Optional[Literal["PluginSetting"]] = Field("PluginSetting", alias="__typename")
 
 
 class PluginTask(BaseModel):
     description: Optional[String] = None
     name: String
     plugin: Plugin
-    typename__: Optional[Literal['PluginTask']] = Field('PluginTask', alias='__typename')
+    typename__: Optional[Literal["PluginTask"]] = Field("PluginTask", alias="__typename")
 
 
 class PluginArgInput(BaseModel):
     key: String
     value: Optional[PluginValueInput] = None
-    typename__: Optional[Literal['PluginArgInput']] = Field('PluginArgInput', alias='__typename')
+    typename__: Optional[Literal["PluginArgInput"]] = Field("PluginArgInput", alias="__typename")
 
 
 class PluginValueInput(BaseModel):
@@ -111,4 +111,4 @@ class PluginValueInput(BaseModel):
     i: Optional[Int] = None
     o: Optional[list[PluginArgInput]] = None
     str: Optional[String] = None
-    typename__: Optional[Literal['PluginValueInput']] = Field('PluginValueInput', alias='__typename')
+    typename__: Optional[Literal["PluginValueInput"]] = Field("PluginValueInput", alias="__typename")

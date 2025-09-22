@@ -356,5 +356,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# extra
 .stash
 .mailmap

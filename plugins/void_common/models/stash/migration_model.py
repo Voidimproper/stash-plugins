@@ -22,12 +22,12 @@ The `String` scalar type represents textual data, represented as UTF-8 character
 
 class MigrateBlobsInput(BaseModel):
     deleteOld: Optional[Boolean] = None
-    typename__: Optional[Literal['MigrateBlobsInput']] = Field('MigrateBlobsInput', alias='__typename')
+    typename__: Optional[Literal["MigrateBlobsInput"]] = Field("MigrateBlobsInput", alias="__typename")
 
 
 class MigrateSceneScreenshotsInput(BaseModel):
     deleteFiles: Optional[Boolean] = None
     overwriteExisting: Optional[Boolean] = None
-    typename__: Optional[Literal['MigrateSceneScreenshotsInput']] = Field(
-        'MigrateSceneScreenshotsInput', alias='__typename'
+    typename__: Optional[Literal["MigrateSceneScreenshotsInput"]] = Field(
+        "MigrateSceneScreenshotsInput", alias="__typename"
     )

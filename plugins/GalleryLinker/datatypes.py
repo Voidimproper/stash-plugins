@@ -1,3 +1,4 @@
+"""Data types for GalleryLinker plugin."""
 from dataclasses import dataclass, field
 
 
@@ -18,6 +19,7 @@ class SettingsSchema:
     )
 
     def __post_init__(self):
+        """Validate settings values."""
         if not (0 <= self.minimumScore <= 1):
             raise ValueError("minimumScore must be between 0 and 1")
         if not (0 <= self.autoLinkThreshold <= 1):
@@ -35,6 +37,7 @@ class MatchResult:
     reasons: list[str]
 
     def __post_init__(self):
+        """Validate score is between 0 and 1."""
         if self.score < 0 or self.score > 1:
             raise ValueError("Score must be between 0 and 1")
 
@@ -54,6 +57,7 @@ class ScoringConfig:
     default_auto_link_threshold: float = 0.7
 
     def __post_init__(self):
+        """Validate weights sum to 1.0."""
         total_weight = (
             self.title_similarity_weight
             + self.date_match_weight

@@ -25,11 +25,11 @@ class LatestVersion(BaseModel):
     shorthash: String
     url: String
     version: String
-    typename__: Optional[Literal['LatestVersion']] = Field('LatestVersion', alias='__typename')
+    typename__: Optional[Literal["LatestVersion"]] = Field("LatestVersion", alias="__typename")
 
 
 class Version(BaseModel):
     build_time: String
     hash: String
     version: Optional[String] = None
-    typename__: Optional[Literal['Version']] = Field('Version', alias='__typename')
+    typename__: Optional[Literal["Version"]] = Field("Version", alias="__typename")
