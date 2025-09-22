@@ -1,2 +1,6 @@
 {
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/plugins",
+        "${workspaceFolder}/tests"
+    ]
 }

@@ -1,6 +1,6 @@
 # import sys
 import json
-from datatypes import SettingsSchema
+from .datatypes import SettingsSchema
 from dataclasses import asdict
 
 

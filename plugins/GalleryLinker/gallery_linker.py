@@ -15,8 +15,8 @@ from datetime import datetime
 from difflib import SequenceMatcher
 from functools import lru_cache
 from typing import List, Optional, Tuple, Union
-from datatypes import MatchResult, ScoringConfig
-from util import parse_settings_argument
+from .datatypes import MatchResult, ScoringConfig
+from .util import parse_settings_argument
 
 try:
     from stashapi.stashapp import StashInterface
