@@ -16,7 +16,7 @@ from difflib import SequenceMatcher
 from functools import lru_cache
 from typing import List, Optional, Tuple, Union
 from datatypes import MatchResult, ScoringConfig
-from util import parse_settings_argument, _get_default_settings
+from util import parse_settings_argument
 
 try:
     from stashapi.stashapp import StashInterface
@@ -43,7 +43,7 @@ class GalleryLinker:
             self._update_config_from_params(default_config, stash_url, api_key)
 
         self.stash = StashInterface(default_config)
-        self.settings = _get_default_settings()
+        self.settings = parse_settings_argument("")
         self.logger = self._setup_logger()
 
     @property
@@ -473,10 +473,10 @@ def main():
             plugin_input = json.loads(sys.stdin.read())
 
     linker = GalleryLinker(args.stash_url, args.api_key)
-
+    linker.logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
+    linker.logger.debug(f"Plugin input: {plugin_input}")
     if plugin_input:
         linker.load_settings(plugin_input)
-        mode = plugin_input.get("args", {}).get("mode", "auto_link_scenes")
     else:
         # Parse settings from command line argument if provided
         if args.settings:
@@ -489,8 +489,9 @@ def main():
                 print(f"Error parsing settings: {e}", file=sys.stderr)
                 return 1
 
-        mode = args.mode
-
+    mode = args.mode
+    linker.logger.debug(f"Settings: {linker.settings}")
+    linker.logger.debug(f"Mode: {mode}")
     # Execute the requested operation
     try:
         if mode == "auto_link_scenes":

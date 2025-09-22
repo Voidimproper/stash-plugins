@@ -1,5 +1,2 @@
 {
-    "python.analysis.extraPaths": [
-        "./stash-plugins/plugins"
-    ]
 }
