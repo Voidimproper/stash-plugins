@@ -1,6 +1,6 @@
 # Pre-commit configuration for stash-plugins
 # Install with: pre-commit install
-
+exclude: '(^docs/|^examples/|^scripts/|^tests/|\.md$|\.rst$|\.txt$|\.json$|\.toml$|\.yml$|\.yaml$|\.xml$|\.sh$|^plugins/void_common/models/stash/)'
 default_language_version:
   python: python3.12
 repos:

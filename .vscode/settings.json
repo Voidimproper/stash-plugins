@@ -1,5 +1,6 @@
 {
     "python.analysis.extraPaths": [
-        "./stash-plugins/plugins"
-    ]
+        "${workspaceFolder}/plugins",
+        "${workspaceFolder}/tests"
+    ],
 }

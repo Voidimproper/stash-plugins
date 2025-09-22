@@ -16,6 +16,7 @@ VENV_PIP := $(VENV_BIN)/pip
 
 help:
 	@echo "Available targets:"
+	@echo "  env              - Set up a virtual environment in .venv"
 	@echo "  install          - Install dev dependencies (using pyproject.toml)"
 	@echo "  lint             - Run code linting with flake8 and mypy"
 	@echo "  format           - Format code with black"
@@ -27,6 +28,18 @@ help:
 	@echo "  ruff-fix         - Fix issues with ruff"
 	@echo "  build            - Build plugin repository with build_site.sh"
 	@echo "  clean            - Clean up generated files"
+
+# Set up virtual environment
+env:
+	@if [ ! -d "$(VENV)" ]; then \
+		$(PYTHON) -m venv $(VENV) --prompt stash-plugins; \
+		$(VENV_PIP) install --upgrade pip; \
+		$(VENV_PIP) install -r requirements.txt; \
+		echo "Virtual environment created in $(VENV)"; \
+	else \
+		echo "Virtual environment already exists in $(VENV)"; \
+	fi
+	@echo "To activate the virtual environment, run: source $(VENV_BIN)/activate"
 
 # Install dependencies (using pyproject.toml)
 install:

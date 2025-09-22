@@ -1,13 +1,10 @@
 # Development requirements
-pre-commit
-
-# Test requirements for Stash plugins
+jupyterlab>=4.4.7
+pre-commit>=4.3.0
+datamodel-code-generator[http,graphql]>=0.33.0
+gql[all]>=4.0.0
 
 # Code quality and linting
 flake8>=6.0.0
 black>=23.0.0
 mypy>=1.0.0
-
-# Plugin dependencies (for testing)
-stashapp-tools>=0.2.0
-requests>=2.28.0

@@ -15,8 +15,9 @@ from datetime import datetime
 from difflib import SequenceMatcher
 from functools import lru_cache
 from typing import List, Optional, Tuple, Union
-from datatypes import MatchResult, ScoringConfig
-from util import parse_settings_argument, _get_default_settings
+
+from .datatypes import MatchResult, ScoringConfig
+from .util import parse_settings_argument
 
 try:
     from stashapi.stashapp import StashInterface
@@ -43,39 +44,47 @@ class GalleryLinker:
             self._update_config_from_params(default_config, stash_url, api_key)
 
         self.stash = StashInterface(default_config)
-        self.settings = _get_default_settings()
+        self.settings = parse_settings_argument("")
         self.logger = self._setup_logger()
 
     @property
     def TITLE_SIMILARITY_WEIGHT(self) -> float:
+        """Weight for title similarity in scoring."""
         return self.scoring_config.title_similarity_weight
 
     @property
     def DATE_MATCH_WEIGHT(self) -> float:
+        """Weight for date match in scoring."""
         return self.scoring_config.date_match_weight
 
     @property
     def FILENAME_SIMILARITY_WEIGHT(self) -> float:
+        """Weight for filename similarity in scoring."""
         return self.scoring_config.filename_similarity_weight
 
     @property
     def PERFORMER_OVERLAP_WEIGHT(self) -> float:
+        """Weight for performer overlap in scoring."""
         return self.scoring_config.performer_overlap_weight
 
     @property
     def TITLE_SIMILARITY_THRESHOLD(self) -> float:
+        """Threshold for title similarity in scoring."""
         return self.scoring_config.title_similarity_threshold
 
     @property
     def FILENAME_SIMILARITY_THRESHOLD(self) -> float:
+        """Threshold for filename similarity in scoring."""
         return self.scoring_config.filename_similarity_threshold
 
     @property
     def DEFAULT_MINIMUM_SCORE(self) -> float:
+        """Default minimum score for matching."""
         return self.scoring_config.default_minimum_score
 
     @property
     def DEFAULT_AUTO_LINK_THRESHOLD(self) -> float:
+        """Default auto-link threshold for matching."""
         return self.scoring_config.default_auto_link_threshold
 
     stash: StashInterface
@@ -138,7 +147,7 @@ class GalleryLinker:
             return ""
         return text.lower().strip()
 
-    @lru_cache(maxsize=1000)
+    @lru_cache(maxsize=1000)  # noqa: B019
     def similarity(self, a: str, b: str) -> float:
         """Calculate similarity between two strings with caching."""
         norm_a = self._normalize_string(a)
@@ -196,7 +205,7 @@ class GalleryLinker:
         if gallery_title and scene_title:
             title_sim = self.similarity(gallery_title, scene_title)
             if title_sim > self.TITLE_SIMILARITY_THRESHOLD:
-                return title_sim * self.TITLE_SIMILARITY_WEIGHT, f"Title similarity: {title_sim:.2f}"
+                return title_sim * self.TITLE_SIMILARITY_WEIGHT, f"Title similarity: {title_sim: .2f}"
         return 0.0, None
 
     def _score_date_match(self, gallery_date: Optional[str], scene_date: Optional[str]) -> Tuple[float, Optional[str]]:
@@ -224,7 +233,7 @@ class GalleryLinker:
                     scene_filename = os.path.basename(file_path)
                     path_sim = self.similarity(gallery_filename, scene_filename)
                     if path_sim > self.FILENAME_SIMILARITY_THRESHOLD:
-                        return path_sim * self.FILENAME_SIMILARITY_WEIGHT, f"Filename similarity: {path_sim:.2f}"
+                        return path_sim * self.FILENAME_SIMILARITY_WEIGHT, f"Filename similarity: {path_sim: .2f}"
         return 0.0, None
 
     def _score_performer_overlap(
@@ -255,7 +264,7 @@ class GalleryLinker:
 
         gallery_title = gallery.get("title", "")
         gallery_date = gallery.get("date", "")
-        gallery_path = gallery.get("path", {}).get("path", "") if gallery.get("path") else ""   # type: ignore
+        gallery_path = gallery.get("path", {}).get("path", "") if gallery.get("path") else ""  # type: ignore[union-attr]
 
         # Extract date from filename if no date set
         if not gallery_date and gallery_path:
@@ -269,7 +278,7 @@ class GalleryLinker:
 
             # Early exit optimization - quick title check
             if gallery_title and scene.get("title"):
-                quick_title_sim = self.similarity(gallery_title, scene["title"])  # type: ignore
+                quick_title_sim = self.similarity(gallery_title, scene["title"])  # type: ignore[arg-type]
                 if quick_title_sim < 0.1:  # Very low threshold for early exit
                     continue
 
@@ -277,26 +286,26 @@ class GalleryLinker:
             reasons = []
 
             # Title similarity
-            t_score, t_reason = self._score_title_similarity(gallery_title, scene.get("title", ""))  # type: ignore
+            t_score, t_reason = self._score_title_similarity(gallery_title, scene.get("title", ""))  # type: ignore[arg-type]
             score += t_score
             if t_reason:
                 reasons.append(t_reason)
 
             # Date matching
-            d_score, d_reason = self._score_date_match(gallery_date, scene.get("date", ""))  # type: ignore
+            d_score, d_reason = self._score_date_match(gallery_date, scene.get("date", ""))  # type: ignore[arg-type]
             score += d_score
             if d_reason:
                 reasons.append(d_reason)
 
             # Filename/path similarity
-            f_score, f_reason = self._score_filename_similarity(gallery_path, scene.get("files", []))  # type: ignore
+            f_score, f_reason = self._score_filename_similarity(gallery_path, scene.get("files", []))  # type: ignore[arg-type]
             score += f_score
             if f_reason:
                 reasons.append(f_reason)
 
             # Performer overlap
             p_score, p_reason = self._score_performer_overlap(
-                gallery.get("performers", []), scene.get("performers", [])  # type: ignore
+                gallery.get("performers", []), scene.get("performers", [])  # type: ignore[arg-type]
             )
             score += p_score
             if p_reason:
@@ -333,7 +342,7 @@ class GalleryLinker:
             if gallery.get("scenes") and not self.settings.get("overwriteExisting", False):
                 continue
 
-            matches = self.find_matching_scenes(gallery, scenes)  # type: ignore
+            matches = self.find_matching_scenes(gallery, scenes)  # type: ignore[arg-type,unused-ignore]
 
             if matches:
                 best_match = matches[0]
@@ -473,10 +482,10 @@ def main():
             plugin_input = json.loads(sys.stdin.read())
 
     linker = GalleryLinker(args.stash_url, args.api_key)
-
+    linker.logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
+    linker.logger.debug(f"Plugin input: {plugin_input}")
     if plugin_input:
         linker.load_settings(plugin_input)
-        mode = plugin_input.get("args", {}).get("mode", "auto_link_scenes")
     else:
         # Parse settings from command line argument if provided
         if args.settings:
@@ -489,8 +498,9 @@ def main():
                 print(f"Error parsing settings: {e}", file=sys.stderr)
                 return 1
 
-        mode = args.mode
-
+    mode = args.mode
+    linker.logger.debug(f"Settings: {linker.settings}")
+    linker.logger.debug(f"Mode: {mode}")
     # Execute the requested operation
     try:
         if mode == "auto_link_scenes":
