@@ -72,7 +72,7 @@ Wiki = "https://github.com/Voidimproper/stash-plugins/wiki"
 "Bug Tracker" = "https://github.com/Voidimproper/stash-plugins/issues"
 "Community" = "https://discord.gg/2TsNFKt"
 
-[project.scripts]
+# [project.scripts]
 # Plugin entry points can be added here if needed
 # gallery-linker = "plugins.GalleryLinker.gallery_linker:main"
 
