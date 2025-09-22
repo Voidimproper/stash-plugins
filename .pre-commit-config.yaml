@@ -2,7 +2,6 @@
 # Install with: pre-commit install
 exclude: |
   (?x) (
-    ^plugins/void_common/models|
     ^scripts|
     ^\.vscode|
     ^\.*__pycache__|
@@ -56,6 +55,14 @@ repos:
     rev: 7.3.0
     hooks:
       - id: flake8
+        exclude: |
+          (?x) (
+            ^plugins/void_common/models|
+            ^tests/gallery_linker.ipynb|
+            ^\.venv|
+            ^\.mypy_cache|
+            ^\.stash
+          )
         additional_dependencies:
           [
             flake8-bugbear,

@@ -125,7 +125,6 @@ exclude = '''(?x) (
         ^tests
         | ^venv
         | ^.venv
-        | ^plugins/void_common/models
     )'''
 python_version = "3.12"
 warn_return_any = true
