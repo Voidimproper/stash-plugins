@@ -1,0 +1,6 @@
+schema:
+  - "resources/graphql/*.graphql"
+  - "resources/graphql/types/*.graphql"
+extensions:
+  endpoints:
+    default: http://localhost:9999/graphql
