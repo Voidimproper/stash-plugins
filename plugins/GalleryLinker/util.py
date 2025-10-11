@@ -22,3 +22,30 @@ def parse_settings_argument(settings_json: str) -> dict:
         raise ValueError(f"Invalid settings structure: {e}") from e
 
     return asdict(parsed_settings)
+
+
+class Filters:
+    """Filter definitions for gallery linking."""
+
+    @staticmethod
+    def null_galleries():
+        """Filter for galleries without any scenes or performers."""
+        return {"galleries": {"modifier": "IS_NULL"}}
+
+    @staticmethod
+    def null_performers():
+        """Filter for performers without any scenes or galleries."""
+        return {"performers": {"modifier": "IS_NULL"}}
+
+    @staticmethod
+    def null_scenes():
+        """Filter for scenes without any galleries or performers."""
+        return {"scenes": {"modifier": "IS_NULL"}}
+
+    @staticmethod
+    def equal(field: str, value):
+        """Filter for a generic value."""
+        return {field: {"value": value, "modifier": "EQUALS"}}
+
+
+FILTERS = Filters()

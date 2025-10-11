@@ -283,4 +283,8 @@ extensions = [
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
-[tool.datamodel-codegen]
+[tool.ariadne-codegen]
+remote_schema_url = "http://localhost:9999/graphql"
+queries_path="graphql"
+target_package_name="stash_gql"
+target_package_path="plugins/void_common"

@@ -12,7 +12,7 @@ import re
 import sys
 from datetime import datetime
 
-from .util import parse_settings_argument
+from .util import FILTERS, parse_settings_argument
 
 try:
     # import stashapi.log as logger
@@ -139,6 +139,39 @@ class GalleryLinker:
                         break
 
         return list(set(found_performers))  # Remove duplicates
+
+    def get_missing_links(self) -> dict:
+        """Identify missing links between galleries and scenes/performers."""
+        galleries = self.stash.find_galleries(filter=FILTERS.null_galleries())
+        scenes = self.stash.find_scenes(filter=FILTERS.null_scenes())
+        performers = self.stash.find_performers(filter=FILTERS.null_performers())
+
+        missing_links: dict[str, list[dict]] = {
+            "galleries_without_scenes": [],
+            "galleries_without_performers": [],
+            "scenes_without_galleries": [],
+            "scenes_without_performers": [],
+            "performers_without_galleries": [],
+            "performers_without_scenes": [],
+        }
+
+        for gallery in galleries:
+            if not gallery.get("scenes"):
+                missing_links["galleries_without_scenes"].append(gallery)
+            if not gallery.get("performers"):
+                missing_links["galleries_without_performers"].append(gallery)
+        for scene in scenes:
+            if not scene.get("gallery"):
+                missing_links["scenes_without_galleries"].append(scene)
+            if not scene.get("performers"):
+                missing_links["scenes_without_performers"].append(scene)
+        for performer in performers:
+            if not performer.get("galleries"):
+                missing_links["performers_without_galleries"].append(performer)
+            if not performer.get("scenes"):
+                missing_links["performers_without_scenes"].append(performer)
+
+        return missing_links
 
     def find_matching_scenes(self, gallery, scenes):
         """Find scenes that could match the gallery with input validation and optimizations."""
