@@ -108,9 +108,30 @@ plugins/PluginName/
 
 ### Reference Repositories
 
+#### Local References
 - **CommunityScripts**: `/Users/dank/git/voidimproper/gh-stashapp/CommunityScripts/` - Primary reference for patterns
 - **Plugin Template**: `/Users/dank/git/voidimproper/gh-stashapp/plugins-repo-template/` - Official template structure
 - **Stash Docs**: `/Users/dank/git/voidimproper/gh-stashapp/Stash-Docs/` - Documentation source
+
+#### Remote Plugin Repositories (Examples and References)
+- **7dJx1qP/stash-plugins**: https://github.com/7dJx1qP/stash-plugins
+- **MinasukiHikimuna/MidnightRider-Stash**: https://github.com/MinasukiHikimuna/MidnightRider-Stash
+- **S3L3CT3DLoves/stashPlugins**: https://github.com/S3L3CT3DLoves/stashPlugins
+- **Serechops/Serechops-Stash**: https://github.com/Serechops/Serechops-Stash
+- **Valkyr-JS Plugin Collection**:
+  - **PerformerDetailsExtended**: https://github.com/Valkyr-JS/PerformerDetailsExtended
+  - **StashMergers**: https://github.com/Valkyr-JS/StashMergers
+  - **StashReels**: https://github.com/Valkyr-JS/StashReels
+  - **ValkyrSceneCards**: https://github.com/Valkyr-JS/ValkyrSceneCards
+  - **stash-plugins**: https://github.com/Valkyr-JS/stash-plugins
+- **W0lfieW0lf/StashApp-Tools**: https://github.com/W0lfieW0lf/StashApp-Tools
+- **carrotwaxr/stash-plugins**: https://github.com/carrotwaxr/stash-plugins
+- **d0t-d0t-d0t/stash-repo**: https://github.com/d0t-d0t-d0t/stash-repo
+- **feederbox826/stashlist**: https://github.com/feederbox826/stashlist
+- **rosa-umineko/CommunityScripts**: https://github.com/rosa-umineko/CommunityScripts
+- **stg-annon/StashScripts**: https://github.com/stg-annon/StashScripts
+- **tetrax-10/stash-stuffs**: https://github.com/tetrax-10/stash-stuffs
+- **xiosensei/Xio-Stash**: https://github.com/xiosensei/Xio-Stash
 
 ### Community Standards Alignment
 

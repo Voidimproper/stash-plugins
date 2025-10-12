@@ -172,3 +172,33 @@ tasks:
 - JavaScript UI components (`gallery_linker.js`)
 - Settings exposed through Stash plugin interface
 - Real-time feedback and progress reporting
+
+## Community Plugin Repositories (Reference Examples)
+
+These remote repositories provide excellent examples of different plugin architectures, patterns, and implementation approaches:
+
+- **7dJx1qP/stash-plugins**: https://github.com/7dJx1qP/stash-plugins
+- **MinasukiHikimuna/MidnightRider-Stash**: https://github.com/MinasukiHikimuna/MidnightRider-Stash
+- **S3L3CT3DLoves/stashPlugins**: https://github.com/S3L3CT3DLoves/stashPlugins
+- **Serechops/Serechops-Stash**: https://github.com/Serechops/Serechops-Stash
+- **Valkyr-JS Plugin Collection** (extensive JavaScript-focused plugins):
+  - **PerformerDetailsExtended**: https://github.com/Valkyr-JS/PerformerDetailsExtended
+  - **StashMergers**: https://github.com/Valkyr-JS/StashMergers
+  - **StashReels**: https://github.com/Valkyr-JS/StashReels
+  - **ValkyrSceneCards**: https://github.com/Valkyr-JS/ValkyrSceneCards
+  - **stash-plugins**: https://github.com/Valkyr-JS/stash-plugins
+- **W0lfieW0lf/StashApp-Tools**: https://github.com/W0lfieW0lf/StashApp-Tools
+- **carrotwaxr/stash-plugins**: https://github.com/carrotwaxr/stash-plugins
+- **d0t-d0t-d0t/stash-repo**: https://github.com/d0t-d0t-d0t/stash-repo
+- **feederbox826/stashlist**: https://github.com/feederbox826/stashlist
+- **rosa-umineko/CommunityScripts**: https://github.com/rosa-umineko/CommunityScripts
+- **stg-annon/StashScripts**: https://github.com/stg-annon/StashScripts
+- **tetrax-10/stash-stuffs**: https://github.com/tetrax-10/stash-stuffs
+- **xiosensei/Xio-Stash**: https://github.com/xiosensei/Xio-Stash
+
+These repositories demonstrate various approaches to:
+- Plugin architecture and organization
+- JavaScript UI integration patterns
+- Python backend implementations
+- Configuration management strategies
+- Community distribution methods

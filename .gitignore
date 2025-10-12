@@ -446,3 +446,36 @@ http-client.private.env.json
 .idea/ApifoxUploaderProjectSetting.xml
 graphql/
 .DS_Store
+
+# Security - Sensitive files and credentials
+*.key
+*.pem
+*.p12
+*.pfx
+*.cer
+*.crt
+*.csr
+*secret*
+*credential*
+*password*
+*token*
+*api_key*
+*private*
+*auth*
+gcm-diagnose.log
+git-credential-*
+.ssh/
+credentials
+secrets.json
+.secrets/
+
+# Environment and configuration files with potential secrets
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.staging
+.env.test
+config.local.*
+settings.local.*
+local.properties
