@@ -1,7 +1,6 @@
+# VoidImproper Stash Plugins
+
 ![Tests and Quality Checks](https://github.com/Voidimproper/stash-plugins/actions/workflows/test.yml/badge.svg)
-
-
-# Template for creating Stash plugins source index
 
 This template allows you to create a new repository with a few clicks with
 preconfigured GitHub action to publish your plugins source index.
