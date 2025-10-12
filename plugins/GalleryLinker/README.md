@@ -7,10 +7,10 @@ performers based on file patterns, dates, and metadata.
 
 ## Features
 
-- **Auto-link by Date**: Links galleries to scenes with matching dates (within configurable tolerance)
-- **Auto-link by Filename**: Links galleries based on filename pattern matching
+- [TODO] **Auto-link by Date**: Links galleries to scenes with matching dates (within configurable tolerance)
+- [TODO] **Auto-link by Filename**: Links galleries based on filename pattern matching
 - **Performer Linking**: Automatically associates performers found in gallery filenames/paths
-- **Manual Linking**: UI for manual gallery-scene-performer associations
+- [TODO] **Manual Linking**: UI for manual gallery-scene-performer associations
 - **Batch Operations**: Process multiple galleries at once
 - **Dry Run Mode**: Preview changes before applying them
 - **Reporting**: Generate detailed linking statistics
@@ -52,8 +52,8 @@ The plugin provides several tasks accessible from the Tasks tab:
 1. **Auto-Link Galleries to Scenes**: Automatically links galleries to scenes based on dates and filenames
 2. **Auto-Link Performers to Galleries**: Links performers to galleries based on file path analysis
 3. **Generate Linking Report**: Creates a report showing linking statistics
-4. **Validate Existing Links**: Checks existing gallery relationships
-5. **Clean Orphaned Relationships**: Removes broken links
+4. [TODO] **Validate Existing Links**: Checks existing gallery relationships
+5. [TODO] **Clean Orphaned Relationships**: Removes broken links
 
 ### UI Interface
 
@@ -68,9 +68,9 @@ When viewing the Galleries page, a floating UI panel provides quick access to co
 **Scene Matching**: Galleries are matched to scenes using:
 
 - Title similarity (70%+ confidence)
-- Date matching (within configured tolerance)
-- Filename pattern matching
-- Performer overlap analysis
+- [TODO] Date matching (within configured tolerance)
+- [TODO] Filename pattern matching
+- [TODO] Performer overlap analysis
 
 **Performer Matching**: Performers are linked by:
 

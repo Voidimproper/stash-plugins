@@ -6,18 +6,18 @@ ui:
   javascript:
     - gallery_linker.js
 settings:
-  autoLinkByDate:
-    displayName: Auto-link by Date
-    description: Automatically link galleries to scenes with matching dates (within tolerance)
-    type: BOOLEAN
-  dateTolerance:
-    displayName: Date Tolerance (days)
-    description: Number of days tolerance when matching gallery and scene dates
-    type: NUMBER
-  autoLinkByFilename:
-    displayName: Auto-link by Filename
-    description: Automatically link galleries based on filename patterns
-    type: BOOLEAN
+  # autoLinkByDate:
+  #   displayName: Auto-link by Date
+  #   description: Automatically link galleries to scenes with matching dates (within tolerance)
+  #   type: BOOLEAN
+  # dateTolerance:
+  #   displayName: Date Tolerance (days)
+  #   description: Number of days tolerance when matching gallery and scene dates
+  #   type: NUMBER
+  # autoLinkByFilename:
+  #   displayName: Auto-link by Filename
+  #   description: Automatically link galleries based on filename patterns
+  #   type: BOOLEAN
   performerLinking:
     displayName: Link Performers
     description: Automatically link performers found in gallery filenames/paths to galleries

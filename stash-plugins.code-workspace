@@ -5,7 +5,9 @@
 		},
 		{
 			"path": "../gh-stashapp"
+		},
+		{
+			"path": "../backups"
 		}
-	],
-	"settings": {}
+	]
 }

@@ -8,9 +8,7 @@ import argparse
 import contextlib
 import json
 import logging
-import re
 import sys
-from datetime import datetime
 
 from .util import FILTERS, parse_settings_argument
 
@@ -21,10 +19,6 @@ except ImportError as e:
     print(f"Error importing required modules: {e}")
     print("Please install required dependencies: pip install stashapp-tools requests")
     sys.exit(1)
-
-# Type aliases for better code readability
-# Scenedict = dict[str, Union[str, List, dict]]
-# Gallerydict = dict[str, Union[str, List, dict]]
 
 
 class GalleryLinker:
@@ -98,47 +92,53 @@ class GalleryLinker:
         """Normalize string for comparison."""
         return text.lower().strip()
 
-    def extract_date_from_filename(self, filename: str) -> datetime | None:
-        """Extract date from filename using common patterns."""
-        date_patterns = [
-            r"(\d{4})[_-](\d{2})[_-](\d{2})",  # YYYY-MM-DD or YYYY_MM_DD
-            r"(\d{2})[_-](\d{2})[_-](\d{4})",  # DD-MM-YYYY or MM-DD-YYYY
-            r"(\d{4})(\d{2})(\d{2})",  # YYYYMMDD
-        ]
+    def get_scenes_without_galleries(self):
+        """Get scenes that are not linked to any galleries."""
+        scene_filter = {"galleries": {"modifier": "IS_NULL"}}
+        frag = """
+            id
+            title
+            files {
+                path
+            }
+        """
+        scenes = self.stash.find_scenes(f=scene_filter, fragment=frag)
+        for scene in scenes:
+            if scene["files"]:
+                scene["file_path"] = scene["files"][0]["path"]
+            else:
+                scene["file_path"] = None
+            del scene["files"]
+        return scenes
 
-        for pattern in date_patterns:
-            match = re.search(pattern, filename)
-            if match:
-                try:
-                    groups = match.groups()
-                    if len(groups[0]) == 4:  # YYYY first
-                        return datetime(int(groups[0]), int(groups[1]), int(groups[2]))
-                    else:  # Year last
-                        return datetime(int(groups[2]), int(groups[0]), int(groups[1]))
-                except ValueError:
-                    continue
-        return None
-
-    def extract_performers_from_path(self, path: str, performers: list[dict]) -> list[str]:
-        """Extract performer names from file path."""
-        found_performers = []
-        path_lower = path.lower()
-
-        for performer in performers:
-            name = performer["name"].lower()
-            # Check if performer name appears in path
-            if name in path_lower:
-                found_performers.append(performer["id"])
-
-            # Check for name variants (first name, last name)
-            name_parts = name.split()
-            if len(name_parts) > 1:
-                for part in name_parts:
-                    if len(part) > 2 and part in path_lower:
-                        found_performers.append(performer["id"])
-                        break
-
-        return list(set(found_performers))  # Remove duplicates
+    def get_galleries_without_scenes(self):
+        """Get galleries that are not linked to any scenes."""
+        gallery_filter = {"scenes": {"value": 0, "modifier": "EQUALS"}}
+        frag = """
+            id
+            title
+            files {
+                path
+            }
+        """
+        galleries = self.stash.find_galleries(f=gallery_filter, fragment=frag)
+        for gallery in galleries:
+            if gallery["files"]:
+                gallery["file_path"] = gallery["files"][0]["path"]
+            else:
+                gallery["file_path"] = None
+            if not gallery["title"]:
+                gallery["title"] = (
+                    gallery["file_path"]
+                    .split("/")[-1]
+                    .replace(".zip", "")
+                    .replace("-", " ")
+                    .replace("_", " ")
+                    .strip()
+                    .title()
+                )
+            del gallery["files"]
+        return galleries
 
     def get_missing_links(self) -> dict:
         """Identify missing links between galleries and scenes/performers."""
