@@ -1,2 +1,4 @@
-.clinerules/*.md
+.clinerules/*
 CLAUDE.md
+.clineignore
+memory-bank/*
