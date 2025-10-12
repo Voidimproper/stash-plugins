@@ -1,3 +1,4 @@
 # Plugin dependencies
 stashapp-tools>=0.2.0
 requests>=2.28.0
+thefuzz>=0.22.1
