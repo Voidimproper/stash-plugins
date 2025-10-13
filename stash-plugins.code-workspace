@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../gh-stashapp"
+		},
+		{
+			"path": "../backups"
+		}
+	]
+}

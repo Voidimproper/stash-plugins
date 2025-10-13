@@ -1,0 +1,14 @@
+schema:
+  - "graphql/schema/*.graphql"
+  - "graphql/schema/stash/**/*.graphql"
+  - "graphql/schema/stash-box/**/*.graphql"
+documents:
+  - "graphql/queries/queries/*.graphql"
+  - "graphql/queries/stash-ui/subscriptions.graphql"
+  - "graphql/queries/stash-ui/data/*.graphql"
+  - "graphql/queries/stash-ui/mutations/*.graphql"
+  - "graphql/queries/stash-ui/queries/*.graphql"
+extensions:
+  endpoints:
+    default:
+      url: "http://0.0.0.0:9999/graphql"
