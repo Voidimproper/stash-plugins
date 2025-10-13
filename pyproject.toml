@@ -20,14 +20,12 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: GNU Affero General Public License v3",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Multimedia",
     "Topic :: Multimedia :: Graphics",
     "Topic :: Multimedia :: Video",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "stashapp-tools>=0.2.0",
     "requests>=2.28.0",
@@ -70,7 +68,7 @@ include = ["plugins"]
 # Tool configurations
 [tool.black]
 line-length = 120
-target-version = ['py310', 'py311', 'py312']
+target-version = ['py312']
 include = '\.pyi?$'
 extend-exclude = '''
 /(

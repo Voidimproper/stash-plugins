@@ -10,6 +10,7 @@ This is a Stash plugins repository that provides a template for creating and dis
 
 ### Environment Setup
 
+
 ```bash
 # Install development dependencies
 pip install -e ".[dev]"
@@ -21,6 +22,7 @@ pre-commit install
 ```
 
 ### Code Quality and Testing
+
 
 ```bash
 # Format code
@@ -50,6 +52,7 @@ make ruff-fix     # Auto-fix with ruff
 
 ### Plugin Building and Deployment
 
+
 ```bash
 # Build plugin repository (creates _site directory with index.yml and plugin zips)
 ./build_site.sh
@@ -62,7 +65,9 @@ make ruff-fix     # Auto-fix with ruff
 
 ### Plugin Structure
 
+
 Each plugin is organized in its own directory under `plugins/`:
+
 
 ```
 plugins/
@@ -77,6 +82,7 @@ plugins/
 
 ### Plugin Configuration (*.yml files)
 
+
 - **name**: Display name for the plugin
 - **description**: Brief description of functionality
 - **version**: Plugin version
@@ -87,11 +93,13 @@ plugins/
 
 ### Core Dependencies
 
+
 - **stashapp-tools**: Main dependency for Stash API interaction
 - **requests**: HTTP client library
 - Plugins use `StashInterface` from `stashapi.stashapp` for Stash connectivity
 
 ### Build System
+
 
 - Uses `build_site.sh` to create plugin repository with:
   - `index.yml`: Plugin source index with metadata, versions, and checksums
@@ -99,6 +107,7 @@ plugins/
 - GitHub Actions automatically build and deploy to GitHub Pages when plugins are modified
 
 ## Code Style Configuration
+
 
 - **Line length**: 120 characters
 - **Python versions**: 3.10, 3.11, 3.12
@@ -109,7 +118,9 @@ plugins/
 
 ## Testing Framework
 
+
 The repository uses pytest for testing:
+
 
 ```bash
 # Run all tests
@@ -126,7 +137,9 @@ make test-coverage
 
 ## Continuous Integration
 
+
 GitHub Actions run on push/PR to main/develop branches:
+
 
 - **Tests**: Multi-version Python testing (3.10, 3.11, 3.12)
 - **Code Quality**: Black formatting, isort, flake8, mypy, ruff, bandit security checks
@@ -161,6 +174,7 @@ For plugin development examples and documentation, refer to these local reposito
 
 - **Purpose**: Official Stash documentation source
 - **Website**: <https://docs.stashapp.cc>
+- **Website**: <https://docs.stashapp.cc>
 - **Key sections**:
   - `docs/plugins/`: Plugin development guides
   - `docs/in-app-manual/plugins/`: Creating plugins documentation
@@ -169,12 +183,14 @@ For plugin development examples and documentation, refer to these local reposito
 
 #### Additional References
 
+
 - **CommunityScrapers**: Scraper examples and templates
 - **stash**: Main Stash application source code
 - **stash-box**: StashDB source code
 - **StashDB-Docs**: StashDB documentation
 
 ### Development Workflow
+
 
 1. **Study existing plugins** in CommunityScripts for implementation patterns
 2. **Reference official documentation** at docs.stashapp.cc for plugin creation guides
@@ -184,13 +200,17 @@ For plugin development examples and documentation, refer to these local reposito
 ### Community Resources
 
 - **Forum**: <https://discourse.stashapp.cc> for support and discussions
+
+- **Forum**: <https://discourse.stashapp.cc> for support and discussions
 - **Plugin sharing**: Create topics on forum and add to community source index list
 - **Plugin manager**: Available in Stash Settings > Plugins for easy installation
 
 ## Important Notes
+
 
 - Plugin source index URL format: `https://<username>.github.io/<repo-name>/main/index.yml`
 - All plugins should handle Stash API authentication and connectivity through StashInterface
 - Plugin tasks support different modes (e.g., auto_link_scenes, generate_report, etc.)
 - Debug tracing and dry-run modes are commonly implemented for troubleshooting
 - Follow patterns from CommunityScripts plugins for consistency with community standards
+

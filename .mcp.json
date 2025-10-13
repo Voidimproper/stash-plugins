@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "context7": {
+      "type": "stdio",
+      "command": "${HOME}/git/voidimproper/stash-plugins",
+      "args": [
+        "/usr/local/bin/npx",
+        "-y",
+        "@upstash/context7-mcp",
+        "--api-key",
+        "${CONTEXT7_API_KEY}"
+      ],
+      "env": {}
+    }
+  }
+}

@@ -37,6 +37,7 @@ class GalleryLinker:
 
         self.stash = StashInterface(default_config)
         self.settings = parse_settings_argument("")
+        self.settings = parse_settings_argument("")
         self.logger = self._setup_logger()
 
     def _build_default_config(self) -> dict:
@@ -155,6 +156,8 @@ def main():
     linker = GalleryLinker(args.stash_url, args.api_key)
     linker.logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
     linker.logger.debug(f"Plugin input: {plugin_input}")
+    linker.logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
+    linker.logger.debug(f"Plugin input: {plugin_input}")
     if plugin_input:
         linker.load_settings(plugin_input)
     else:
@@ -169,6 +172,9 @@ def main():
                 print(f"Error parsing settings: {e}", file=sys.stderr)
                 return 1
 
+    mode = args.mode
+    linker.logger.debug(f"Settings: {linker.settings}")
+    linker.logger.debug(f"Mode: {mode}")
     mode = args.mode
     linker.logger.debug(f"Settings: {linker.settings}")
     linker.logger.debug(f"Mode: {mode}")

@@ -14,10 +14,10 @@ settings:
   #   displayName: Date Tolerance (days)
   #   description: Number of days tolerance when matching gallery and scene dates
   #   type: NUMBER
-  # autoLinkByFilename:
-  #   displayName: Auto-link by Filename
-  #   description: Automatically link galleries based on filename patterns
-  #   type: BOOLEAN
+  autoLinkByFilename:
+    displayName: Auto-link by Filename
+    description: Automatically link galleries based on filename patterns
+    type: BOOLEAN
   performerLinking:
     displayName: Link Performers
     description: Automatically link performers found in gallery filenames/paths to galleries
