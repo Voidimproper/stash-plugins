@@ -109,9 +109,9 @@ plugins/PluginName/
 ### Reference Repositories
 
 #### Local References
-- **CommunityScripts**: `/Users/dank/git/voidimproper/gh-stashapp/CommunityScripts/` - Primary reference for patterns
-- **Plugin Template**: `/Users/dank/git/voidimproper/gh-stashapp/plugins-repo-template/` - Official template structure
-- **Stash Docs**: `/Users/dank/git/voidimproper/gh-stashapp/Stash-Docs/` - Documentation source
+- **CommunityScripts**: `${HOME}/git/voidimproper/gh-stashapp/CommunityScripts/` - Primary reference for patterns
+- **Plugin Template**: `${HOME}/git/voidimproper/gh-stashapp/plugins-repo-template/` - Official template structure
+- **Stash Docs**: `${HOME}/git/voidimproper/gh-stashapp/Stash-Docs/` - Documentation source
 
 #### Remote Plugin Repositories (Examples and References)
 - **7dJx1qP/stash-plugins**: https://github.com/7dJx1qP/stash-plugins

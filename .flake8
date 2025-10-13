@@ -38,6 +38,7 @@ exclude =
     .venv,
     env,
     .env
+    plugins/**/examples/*
 
 # Files to exclude
 per-file-ignores =
@@ -47,6 +48,7 @@ per-file-ignores =
     __init__.py:F401
     # Configuration files
     conftest.py:F401,F811
+
 
 # Maximum complexity for McCabe
 max-complexity = 15

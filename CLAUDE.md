@@ -138,9 +138,9 @@ GitHub Actions run on push/PR to main/develop branches:
 
 ### Local Reference Repositories
 
-For plugin development examples and documentation, refer to these local repositories in `/Users/dank/git/voidimproper/gh-stashapp/`:
+For plugin development examples and documentation, refer to these local repositories in `${HOME}/git/voidimproper/gh-stashapp/`:
 
-#### CommunityScripts (`/Users/dank/git/voidimproper/gh-stashapp/CommunityScripts/`)
+#### CommunityScripts (`${HOME}/git/voidimproper/gh-stashapp/CommunityScripts/`)
 
 - **Purpose**: Official Stash community plugins, themes, userscripts, and utilities
 - **Plugin examples**: Contains real-world plugin implementations in `plugins/` directory
@@ -151,13 +151,13 @@ For plugin development examples and documentation, refer to these local reposito
 - **Source index**: `https://stashapp.github.io/CommunityScripts/stable/index.yml`
 - **Installation**: Available via Stash Plugin Manager (Community stable source)
 
-#### Plugin Template (`/Users/dank/git/voidimproper/gh-stashapp/plugins-repo-template/`)
+#### Plugin Template (`${HOME}/git/voidimproper/gh-stashapp/plugins-repo-template/`)
 
 - **Purpose**: Official template for creating plugin repositories
 - **Usage**: Use as reference for repository structure and GitHub Actions setup
 - **Features**: Pre-configured build and deployment workflows
 
-#### Stash Documentation (`/Users/dank/git/voidimproper/gh-stashapp/Stash-Docs/`)
+#### Stash Documentation (`${HOME}/git/voidimproper/gh-stashapp/Stash-Docs/`)
 
 - **Purpose**: Official Stash documentation source
 - **Website**: <https://docs.stashapp.cc>
