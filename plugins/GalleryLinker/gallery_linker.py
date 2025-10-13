@@ -10,7 +10,7 @@ import json
 import logging
 import sys
 
-from void_common.util import parse_settings_argument
+from GalleryLinker.util import parse_settings_argument
 
 try:
     # import stashapi.log as logger
