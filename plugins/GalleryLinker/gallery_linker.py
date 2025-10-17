@@ -10,10 +10,11 @@ import json
 import logging
 import sys
 
+from GalleryLinker.scene_gallery_linker import SceneGalleryLinker
 from GalleryLinker.util import parse_settings_argument
 
 try:
-    # import stashapi.log as logger
+    import stashapi.log as logger
     from stashapi.stashapp import StashInterface
 except ImportError as e:
     print(f"Error importing required modules: {e}")
@@ -26,7 +27,6 @@ class GalleryLinker:
 
     stash: StashInterface
     settings: dict
-    logger: logging.Logger
 
     def __init__(self, stash_url: str | None = None, api_key: str | None = None):
         """Initialize the GalleryLinker with Stash connection details."""
@@ -37,8 +37,7 @@ class GalleryLinker:
 
         self.stash = StashInterface(default_config)
         self.settings = parse_settings_argument("")
-        self.settings = parse_settings_argument("")
-        self.logger = self._setup_logger()
+        self.logger = logger
 
     def _build_default_config(self) -> dict:
         """Build default Stash connection configuration."""
@@ -46,7 +45,7 @@ class GalleryLinker:
             "scheme": "http",
             "host": "localhost",
             "port": "9999",
-            "logger": logging.getLogger("stashapi"),
+            # "logger": logging.getLogger("stashapi"),
         }
 
     def _update_config_from_params(self, config: dict, stash_url: str | None, api_key: str | None) -> None:
@@ -65,18 +64,18 @@ class GalleryLinker:
         if api_key:
             config["ApiKey"] = api_key
 
-    def _setup_logger(self) -> logging.Logger:
-        """Set up logging configuration."""
-        logger = logging.getLogger("gallery_linker")
-        logger.setLevel(logging.INFO)
+    # def _setup_logger(self) -> logging.Logger | logger:
+    #     """Set up logging configuration."""
+    #     self._logger = logging.getLogger("gallery_linker")
+    #     self._logger.setLevel(logging.INFO)
 
-        if not logger.handlers:
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-            handler.setFormatter(formatter)
-            logger.addHandler(handler)
+    #     if not logger.handlers:
+    #         handler = logging.StreamHandler()
+    #         formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    #         handler.setFormatter(formatter)
+    #         logger.addHandler(handler)
 
-        return logger
+    #     return logger
 
     def load_settings(self, plugin_input: dict) -> None:
         """Load plugin settings from Stash input."""
@@ -86,20 +85,43 @@ class GalleryLinker:
 
         self.settings = plugin_input.get("args", {})
 
-        if self.settings.get("debugTracing", False):
-            self.logger.setLevel(logging.DEBUG)
+        # if self.settings.get("debugTracing", False):
+        #     self.logger.setLevel(logging.DEBUG)
 
-    def _normalize_string(self, text: str) -> str:
-        """Normalize string for comparison."""
-        return text.lower().strip()
-
-    def find_matching_scenes(self, gallery, scenes):
-        """Find scenes that could match the gallery with input validation and optimizations."""
-        pass
-
-    def auto_link_scenes(self):
+    def auto_link_scenes(self, link_strategy: str = "name_similarity") -> None:
         """Automatically link galleries to scenes."""
-        pass
+        linker = SceneGalleryLinker(self.stash)
+
+        # Example 2: Auto-link scenes to galleries based on path proximity
+        batch_result = linker.link_scenes_to_galleries_by_path(
+            scene_ids=None,  # Process all scenes
+            gallery_ids=None,  # Consider all galleries
+            # dry_run=True,
+            # link_strategy="path_proximity",
+            link_strategy=link_strategy,
+        )
+
+        self.logger.debug("Batch linking results:")
+        self.logger.debug(f"  Linked: {len(batch_result['linked'])}")
+        self.logger.debug(f"  Errors: {len(batch_result['errors'])}")
+        self.logger.debug(f"  Skipped: {len(batch_result['skipped'])}")
+        self.logger.debug("Detailed linked items:")
+        if self.logger.sl.level <= logging.DEBUG:
+            for linked in batch_result["linked"]:
+                self.logger.debug(
+                    f"  Scene '{linked['scene_title']}' linked to Gallery '{linked['gallery_title']}' "
+                    f"(Score: {linked['match_score']:.2f}, Dry Run: {linked.get('dry_run', False)})"
+                )
+
+            self.logger.debug("Detailed errors:")
+            for error in batch_result["errors"]:
+                self.logger.debug(f"  {error}")
+
+            self.logger.debug("Detailed skipped items:")
+            for skipped in batch_result["skipped"]:
+                self.logger.debug(
+                    f"  Scene ID {skipped['scene_id']}, Title: {skipped['scene_title']} skipped: {skipped['reason']}"
+                )
 
     def auto_link_performers(self):
         """Automatically link performers to galleries."""
@@ -135,7 +157,7 @@ def main():
     parser.add_argument("--url", dest="stash_url", help="Stash URL")
     parser.add_argument("--api-key", dest="api_key", help="Stash API Key")
     parser.add_argument("--dry-run", dest="dry_run", action="store_true", help="Enable dry run mode")
-    parser.add_argument("--debug", dest="debug", action="store_true", help="Enable debug logging")
+    # parser.add_argument("--debug", dest="debug", action="store_true", help="Enable debug logging")
     parser.add_argument(
         "--mode",
         dest="mode",
@@ -154,9 +176,7 @@ def main():
             plugin_input = json.loads(sys.stdin.read())
 
     linker = GalleryLinker(args.stash_url, args.api_key)
-    linker.logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
-    linker.logger.debug(f"Plugin input: {plugin_input}")
-    linker.logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
+    # linker.logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
     linker.logger.debug(f"Plugin input: {plugin_input}")
     if plugin_input:
         linker.load_settings(plugin_input)
@@ -175,13 +195,10 @@ def main():
     mode = args.mode
     linker.logger.debug(f"Settings: {linker.settings}")
     linker.logger.debug(f"Mode: {mode}")
-    mode = args.mode
-    linker.logger.debug(f"Settings: {linker.settings}")
-    linker.logger.debug(f"Mode: {mode}")
     # Execute the requested operation
     try:
         if mode == "auto_link_scenes":
-            result = linker.auto_link_scenes()
+            linker.auto_link_scenes()
         elif mode == "auto_link_performers":
             result = linker.auto_link_performers()
         elif mode == "generate_report":
