@@ -3,21 +3,13 @@ description: Links image galleries to related scenes and performers based on fil
 version: 1.0.0
 url: https://github.com/Voidimproper/stash-plugins/tree/main/plugins/GalleryLinker
 settings:
-  # autoLinkByDate:
-  #   displayName: Auto-link by Date
-  #   description: Automatically link galleries to scenes with matching dates (within tolerance)
-  #   type: BOOLEAN
-  # dateTolerance:
-  #   displayName: Date Tolerance (days)
-  #   description: Number of days tolerance when matching gallery and scene dates
-  #   type: NUMBER
   autoLinkByFilename:
     displayName: Auto-link by Filename
     description: Automatically link galleries based on filename patterns
     type: BOOLEAN
   performerLinking:
     displayName: Link Performers
-    description: Automatically link performers found in gallery filenames/paths to galleries
+    description: Automatically link performers found in gallery and scene filenames/paths to galleries
     type: BOOLEAN
   debugTracing:
     displayName: Debug Tracing
@@ -44,10 +36,6 @@ tasks:
     description: Generate a report of all gallery-scene-performer relationships
     defaultArgs:
       mode: generate_report
-  # - name: Link Gallery to Specific Scene
-  #   description: Manually link a specific gallery to a specific scene
-  #   defaultArgs:
-  #     mode: link_gallery_scene
   # - name: Validate Existing Links
   #   description: Validate and report on existing gallery relationships
   #   defaultArgs:

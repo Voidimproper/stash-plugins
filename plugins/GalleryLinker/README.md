@@ -7,10 +7,8 @@ performers based on file patterns, dates, and metadata.
 
 ## Features
 
-- [TODO] **Auto-link by Date**: Links galleries to scenes with matching dates (within configurable tolerance)
 - [TODO] **Auto-link by Filename**: Links galleries based on filename pattern matching
-- **Performer Linking**: Automatically associates performers found in gallery filenames/paths
-- [TODO] **Manual Linking**: UI for manual gallery-scene-performer associations
+- [TODO] **Performer Linking**: Automatically associates performers found in gallery filenames/paths
 - **Batch Operations**: Process multiple galleries at once
 - **Dry Run Mode**: Preview changes before applying them
 - **Reporting**: Generate detailed linking statistics
@@ -20,7 +18,6 @@ performers based on file patterns, dates, and metadata.
 1. Copy the plugin files to your Stash plugins directory:
    - `gallery_linker.yml`
    - `gallery_linker.py`
-   - `gallery_linker.js`
 
 2. Install required Python dependencies:
 
@@ -36,8 +33,6 @@ performers based on file patterns, dates, and metadata.
 
 The plugin provides several configuration options:
 
-- **Auto-link by Date**: Enable automatic linking based on date matching
-- **Date Tolerance**: Number of days tolerance for date matching (default: 7)
 - **Auto-link by Filename**: Enable filename pattern matching
 - **Link Performers**: Automatically link performers from file paths
 - **Debug Tracing**: Enable detailed logging for troubleshooting
@@ -68,8 +63,7 @@ When viewing the Galleries page, a floating UI panel provides quick access to co
 **Scene Matching**: Galleries are matched to scenes using:
 
 - Title similarity (70%+ confidence)
-- [TODO] Date matching (within configured tolerance)
-- [TODO] Filename pattern matching
+- Filename pattern matching
 - [TODO] Performer overlap analysis
 
 **Performer Matching**: Performers are linked by:
