@@ -1,5 +1,5 @@
 """Stash plugins package."""
 
-from .GalleryLinker import datatypes, gallery_linker, util
+from .GalleryLinker import datatypes, gallery_linker
 
 __all__ = ["util", "datatypes", "gallery_linker"]

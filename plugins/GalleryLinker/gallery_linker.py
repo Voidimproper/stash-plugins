@@ -9,10 +9,10 @@ import contextlib
 import json
 import logging
 import sys
+from typing import Any
 
 from GalleryLinker.scene_gallery_linker import SceneGalleryLinker
 from GalleryLinker.util import parse_settings_argument
-from traitlets import Any
 
 try:
     import stashapi.log as logger
@@ -158,7 +158,6 @@ def main():
             plugin_input = json.loads(sys.stdin.read())
 
     linker = GalleryLinker(args.stash_url, args.api_key)
-    # linker.logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
     logger.debug(f"Plugin input: {plugin_input}")
     if plugin_input:
         linker.load_settings(plugin_input)
