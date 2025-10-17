@@ -9,11 +9,13 @@ import contextlib
 import json
 import logging
 import sys
+from typing import Any
 
-from void_common.util import parse_settings_argument
+from GalleryLinker.scene_gallery_linker import SceneGalleryLinker
+from GalleryLinker.util import parse_settings_argument
 
 try:
-    # import stashapi.log as logger
+    import stashapi.log as logger
     from stashapi.stashapp import StashInterface
 except ImportError as e:
     print(f"Error importing required modules: {e}")
@@ -26,7 +28,6 @@ class GalleryLinker:
 
     stash: StashInterface
     settings: dict
-    logger: logging.Logger
 
     def __init__(self, stash_url: str | None = None, api_key: str | None = None):
         """Initialize the GalleryLinker with Stash connection details."""
@@ -37,8 +38,7 @@ class GalleryLinker:
 
         self.stash = StashInterface(default_config)
         self.settings = parse_settings_argument("")
-        self.settings = parse_settings_argument("")
-        self.logger = self._setup_logger()
+        self.logger = logger
 
     def _build_default_config(self) -> dict:
         """Build default Stash connection configuration."""
@@ -46,7 +46,6 @@ class GalleryLinker:
             "scheme": "http",
             "host": "localhost",
             "port": "9999",
-            "logger": logging.getLogger("stashapi"),
         }
 
     def _update_config_from_params(self, config: dict, stash_url: str | None, api_key: str | None) -> None:
@@ -65,19 +64,6 @@ class GalleryLinker:
         if api_key:
             config["ApiKey"] = api_key
 
-    def _setup_logger(self) -> logging.Logger:
-        """Set up logging configuration."""
-        logger = logging.getLogger("gallery_linker")
-        logger.setLevel(logging.INFO)
-
-        if not logger.handlers:
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-            handler.setFormatter(formatter)
-            logger.addHandler(handler)
-
-        return logger
-
     def load_settings(self, plugin_input: dict) -> None:
         """Load plugin settings from Stash input."""
         if "server_connection" in plugin_input:
@@ -86,20 +72,39 @@ class GalleryLinker:
 
         self.settings = plugin_input.get("args", {})
 
-        if self.settings.get("debugTracing", False):
-            self.logger.setLevel(logging.DEBUG)
-
-    def _normalize_string(self, text: str) -> str:
-        """Normalize string for comparison."""
-        return text.lower().strip()
-
-    def find_matching_scenes(self, gallery, scenes):
-        """Find scenes that could match the gallery with input validation and optimizations."""
-        pass
-
-    def auto_link_scenes(self):
+    def auto_link_scenes(self, link_strategy: str = "name_similarity", dry_run: bool = False) -> dict[str, Any]:
         """Automatically link galleries to scenes."""
-        pass
+        linker = SceneGalleryLinker(self.stash)
+
+        batch_result = linker.link_scenes_to_galleries_by_path(
+            scene_ids=None,  # Process all scenes
+            gallery_ids=None,  # Consider all galleries
+            dry_run=dry_run,
+            link_strategy=link_strategy,
+        )
+
+        self.logger.info(f"Batch Linked: {len(batch_result['linked'])}")
+        self.logger.info(f"Batch Errors: {len(batch_result['errors'])}")
+        self.logger.info(f"Batch Skipped: {len(batch_result['skipped'])}")
+
+        if self.logger.sl.level <= logging.DEBUG:
+            self.logger.debug("Detailed linked items:")
+            for linked in batch_result["linked"]:
+                self.logger.debug(
+                    f"  Scene '{linked['scene_title']}' linked to Gallery '{linked['gallery_title']}' "
+                    f"(Score: {linked['match_score']:.2f}, Dry Run: {linked.get('dry_run', False)})"
+                )
+
+            self.logger.debug("Detailed errors:")
+            for error in batch_result["errors"]:
+                self.logger.debug(f"  {error}")
+
+            self.logger.debug("Detailed skipped items:")
+            for skipped in batch_result["skipped"]:
+                self.logger.debug(
+                    f"  Scene ID {skipped['scene_id']}, Title: {skipped['scene_title']} skipped: {skipped['reason']}"
+                )
+        return batch_result  # type: ignore[no-any-return]
 
     def auto_link_performers(self):
         """Automatically link performers to galleries."""
@@ -135,7 +140,6 @@ def main():
     parser.add_argument("--url", dest="stash_url", help="Stash URL")
     parser.add_argument("--api-key", dest="api_key", help="Stash API Key")
     parser.add_argument("--dry-run", dest="dry_run", action="store_true", help="Enable dry run mode")
-    parser.add_argument("--debug", dest="debug", action="store_true", help="Enable debug logging")
     parser.add_argument(
         "--mode",
         dest="mode",
@@ -154,10 +158,7 @@ def main():
             plugin_input = json.loads(sys.stdin.read())
 
     linker = GalleryLinker(args.stash_url, args.api_key)
-    linker.logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
-    linker.logger.debug(f"Plugin input: {plugin_input}")
-    linker.logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
-    linker.logger.debug(f"Plugin input: {plugin_input}")
+    logger.debug(f"Plugin input: {plugin_input}")
     if plugin_input:
         linker.load_settings(plugin_input)
     else:
@@ -173,11 +174,8 @@ def main():
                 return 1
 
     mode = args.mode
-    linker.logger.debug(f"Settings: {linker.settings}")
-    linker.logger.debug(f"Mode: {mode}")
-    mode = args.mode
-    linker.logger.debug(f"Settings: {linker.settings}")
-    linker.logger.debug(f"Mode: {mode}")
+    logger.debug(f"Settings: {linker.settings}")
+    logger.debug(f"Mode: {mode}")
     # Execute the requested operation
     try:
         if mode == "auto_link_scenes":
@@ -189,11 +187,11 @@ def main():
         else:
             result = {"error": f"Unknown mode: {mode}"}
 
-        print(json.dumps(result, indent=2))
+        logger.debug(result)
 
     except Exception as e:
         error_result = {"error": str(e)}
-        print(json.dumps(error_result, indent=2))
+        logger.error(error_result)
         return 1
 
     return 0
