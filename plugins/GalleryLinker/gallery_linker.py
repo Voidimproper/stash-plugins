@@ -6,13 +6,12 @@ Links image galleries to related scenes and performers based on file patterns, d
 
 import argparse
 import contextlib
+import importlib.util
 import json
 import logging
+import os
 import sys
 from typing import Any
-
-from GalleryLinker.scene_gallery_linker import SceneGalleryLinker
-from GalleryLinker.util import parse_settings_argument
 
 try:
     import stashapi.log as logger
@@ -21,6 +20,20 @@ except ImportError as e:
     print(f"Error importing required modules: {e}")
     print("Please install required dependencies: pip install stashapp-tools requests")
     sys.exit(1)
+
+if importlib.util.find_spec("GalleryLinker") is None:
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, os.path.abspath(os.path.join(current_dir, "..", "..", "stashapi")))
+
+try:
+    from GalleryLinker.performer_gallery_linker import PerformerGalleryLinker
+    from GalleryLinker.scene_gallery_linker import SceneGalleryLinker
+    from GalleryLinker.util import parse_settings_argument
+except ImportError as e:
+    print(f"Error importing GalleryLinker modules: {e}, trying local imports.")
+    from performer_gallery_linker import PerformerGalleryLinker
+    from scene_gallery_linker import SceneGalleryLinker
+    from util import parse_settings_argument
 
 
 class GalleryLinker:
@@ -106,9 +119,49 @@ class GalleryLinker:
                 )
         return batch_result  # type: ignore[no-any-return]
 
-    def auto_link_performers(self):
+    def auto_link_performers(
+        self, create_missing: bool = True, use_stashdb: bool = False, dry_run: bool = False
+    ) -> dict[str, Any]:
         """Automatically link performers to galleries."""
-        pass
+        linker = PerformerGalleryLinker(self.stash)
+
+        batch_result = linker.link_performers_to_galleries(
+            gallery_ids=None,  # Process all galleries
+            performer_ids=None,  # Consider all performers
+            dry_run=dry_run,
+            create_missing=create_missing,
+            use_stashdb=use_stashdb,
+        )
+
+        self.logger.info(f"Batch Linked: {len(batch_result['linked'])}")
+        self.logger.info(f"Batch Created: {len(batch_result['created'])}")
+        self.logger.info(f"Batch Errors: {len(batch_result['errors'])}")
+        self.logger.info(f"Batch Skipped: {len(batch_result['skipped'])}")
+
+        if self.logger.sl.level <= logging.DEBUG:
+            self.logger.debug("Detailed linked items:")
+            for linked in batch_result["linked"]:
+                self.logger.debug(
+                    f"  Performer '{linked['performer_name']}' linked to Gallery '{linked['gallery_title']}' "
+                    f"(Source: {linked['match_source']}, Score: {linked['match_score']:.2f}, "
+                    f"Dry Run: {linked.get('dry_run', False)})"
+                )
+
+            self.logger.debug("Detailed created performers:")
+            for created in batch_result["created"]:
+                self.logger.debug(f"  Created performer: {created}")
+
+            self.logger.debug("Detailed errors:")
+            for error in batch_result["errors"]:
+                self.logger.debug(f"  {error}")
+
+            self.logger.debug("Detailed skipped items:")
+            for skipped in batch_result["skipped"]:
+                self.logger.debug(
+                    f"  Gallery ID {skipped['gallery_id']}, Title: {skipped['gallery_title']} "
+                    f"skipped: {skipped['reason']}"
+                )
+        return batch_result  # type: ignore[no-any-return]
 
     def generate_report(self) -> dict:
         """Generate a report of gallery relationships."""
@@ -170,19 +223,22 @@ def main():
                 plugin_input = {"args": parsed_settings}
                 linker.load_settings(plugin_input)
             except ValueError as e:
-                print(f"Error parsing settings: {e}", file=sys.stderr)
+                logger.error(f"Error parsing settings: {e}")
                 return 1
 
-    mode = args.mode
+    mode = linker.settings.get("mode", args.mode)
     logger.debug(f"Settings: {linker.settings}")
     logger.debug(f"Mode: {mode}")
     # Execute the requested operation
     try:
         if mode == "auto_link_scenes":
+            logger.info("Starting automatic scene-gallery linking")
             result = linker.auto_link_scenes()
         elif mode == "auto_link_performers":
+            logger.info("Starting automatic performer-gallery linking")
             result = linker.auto_link_performers()
         elif mode == "generate_report":
+            logger.info("Generating gallery linking report")
             result = linker.generate_report()
         else:
             result = {"error": f"Unknown mode: {mode}"}

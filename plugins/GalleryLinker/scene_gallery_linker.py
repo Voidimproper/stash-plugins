@@ -1,10 +1,10 @@
 """Module to link scenes to galleries in Stash based on file paths and naming conventions."""
 
-import logging
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import stashapi.log as logger
 from stashapi.stashapp import StashInterface
 
 
@@ -19,7 +19,7 @@ class SceneGalleryLinker:
             stash_interface: StashInterface instance for API communication
         """
         self.stash = stash_interface
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger
 
     def link_scenes_to_galleries_by_path(
         self,
