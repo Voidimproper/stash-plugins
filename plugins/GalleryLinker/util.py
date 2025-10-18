@@ -6,7 +6,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Optional
 
-from .datatypes import SettingsSchema
+from datatypes import SettingsSchema
 
 
 def extract_gallery_title(gallery_path: Optional[str]) -> str:
