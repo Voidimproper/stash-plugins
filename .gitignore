@@ -484,3 +484,4 @@ local.properties
 memory-bank/code-improvements/
 
 *.code-workspace
+.op/
