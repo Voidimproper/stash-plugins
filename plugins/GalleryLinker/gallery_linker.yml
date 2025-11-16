@@ -1,4 +1,5 @@
 name: Gallery Linker
+# requires: PythonDepManager
 description: Links image galleries to related scenes and performers based on file patterns, dates, and metadata.
 version: 1.0.0
 url: https://github.com/Voidimproper/stash-plugins/tree/main/plugins/GalleryLinker
@@ -36,6 +37,10 @@ tasks:
     description: Generate a report of all gallery-scene-performer relationships
     defaultArgs:
       mode: generate_report
+  - name: Clear All Gallery Links
+    description: Remove all existing gallery-scene and gallery-performer relationships
+    defaultArgs:
+      mode: clear_all_links
   # - name: Validate Existing Links
   #   description: Validate and report on existing gallery relationships
   #   defaultArgs:

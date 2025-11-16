@@ -37,8 +37,10 @@ exclude =
     venv,
     .venv,
     env,
-    .env
-    plugins/**/examples/*
+    .env,
+    plugins/**/examples/*,
+    .stash,
+    memory-bank
 
 # Files to exclude
 per-file-ignores =

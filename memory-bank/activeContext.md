@@ -133,6 +133,18 @@ plugins/PluginName/
 - **tetrax-10/stash-stuffs**: https://github.com/tetrax-10/stash-stuffs
 - **xiosensei/Xio-Stash**: https://github.com/xiosensei/Xio-Stash
 
+#### Userscript Development References
+
+- **Awesome Userscripts Collection**:
+  [https://github.com/awesome-scripts/awesome-userscripts](https://github.com/awesome-scripts/awesome-userscripts) -
+  Curated list of userscripts and resources
+- **Violentmonkey Official Site**:
+  [https://violentmonkey.github.io/](https://violentmonkey.github.io/) -
+  Documentation and guides for Violentmonkey userscript manager
+- **Violentmonkey GitHub**:
+  [https://github.com/violentmonkey](https://github.com/violentmonkey) -
+  Source code and development resources for Violentmonkey
+
 ### Community Standards Alignment
 
 - Following established plugin patterns from CommunityScripts

@@ -274,7 +274,7 @@ class PerformerGalleryLinker:
 
             # Check name match
             score = self._calculate_name_match_score(search_text, performer_name)
-            if score > 0.7:
+            if score > 0.9:
                 match = performer.copy()
                 match["match_score"] = score
                 match["match_source"] = "name_parsing"
@@ -284,7 +284,7 @@ class PerformerGalleryLinker:
             # Check alias matches
             for alias in aliases:
                 score = self._calculate_name_match_score(search_text, alias)
-                if score > 0.7:
+                if score > 0.9:
                     match = performer.copy()
                     match["match_score"] = score
                     match["match_source"] = "alias_parsing"

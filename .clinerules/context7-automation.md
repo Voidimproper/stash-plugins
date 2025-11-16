@@ -1,6 +1,8 @@
 ## Brief overview
 
-Global guidelines for automatically leveraging Context7 MCP tools to provide comprehensive documentation and code examples when working with libraries, APIs, and development tasks. These rules ensure that I proactively use Context7 without requiring explicit user requests.
+Global guidelines for automatically leveraging Context7 MCP tools to provide
+comprehensive documentation and code examples when working with libraries, APIs,
+and development tasks. These rules ensure that I proactively use Context7 without requiring explicit user requests.
 
 ## Automatic Context7 usage triggers
 

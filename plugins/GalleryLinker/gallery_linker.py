@@ -163,6 +163,39 @@ class GalleryLinker:
                 )
         return batch_result  # type: ignore[no-any-return]
 
+    def clear_all_links(self) -> dict:
+        """Clear all gallery-scene and gallery-performer links."""
+        self.logger.info("Clearing all gallery-scene and gallery-performer links")
+
+        # Clear gallery-scene links
+        galleries = self.stash.find_galleries()
+        cleared_gallery_scene_links = 0
+        cleared_gallery_performer_links = 0
+
+        for gallery in galleries:
+            gallery_id = gallery["id"]
+
+            # Clear scene links
+            if gallery.get("scenes"):
+                self.stash.update_gallery({"gallery_id": gallery_id, "scene_ids": []})
+                cleared_gallery_scene_links += 1
+                self.logger.debug(f"Cleared scene links for Gallery ID {gallery_id}")
+
+            # Clear performer links
+            if gallery.get("performers"):
+                self.stash.update_gallery({"gallery_id": gallery_id, "performer_ids": []})
+                cleared_gallery_performer_links += 1
+                self.logger.debug(f"Cleared performer links for Gallery ID {gallery_id}")
+
+        self.logger.info(
+            f"Cleared all links: {cleared_gallery_scene_links} gallery-scene links, "
+            f"{cleared_gallery_performer_links} gallery-performer links"
+        )
+        return {
+            "cleared_gallery_scene_links": cleared_gallery_scene_links,
+            "cleared_gallery_performer_links": cleared_gallery_performer_links,
+        }
+
     def generate_report(self) -> dict:
         """Generate a report of gallery relationships."""
         self.logger.info("Generating linking report")
@@ -240,6 +273,9 @@ def main():
         elif mode == "generate_report":
             logger.info("Generating gallery linking report")
             result = linker.generate_report()
+        elif mode == "clear_all_links":
+            logger.info("Generating gallery linking report")
+            result = linker.clear_all_links()
         else:
             result = {"error": f"Unknown mode: {mode}"}
 
